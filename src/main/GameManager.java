@@ -1,13 +1,9 @@
 package main;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import main.classes.PlayerManager;
-
-import java.io.IOException;
+import main.classes.Sprite;
+import main.classes.Type;
 
 public class GameManager {
     protected GraphicManager graphicManager;
@@ -17,11 +13,15 @@ public class GameManager {
         graphicManager = new GraphicManager(primaryStage);
         playerManager = new PlayerManager(graphicManager);
 
-
+        if(playerManager.getPlayer().isShooting()){
+            Sprite bullet = new Sprite(playerManager.getPlayer().getPosition(),0.2, 3, Type.BULLET);
+            bullet.setMovingXcoefficient(1);
+            graphicManager.add(bullet);
+        }
     }
 
     public void start(){
-        graphicManager.add(playerManager.getPlayerSprite());
+        graphicManager.add(playerManager.getPlayer());
         graphicManager.start();
     }
 

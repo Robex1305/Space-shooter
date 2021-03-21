@@ -9,6 +9,7 @@ import main.FilesName;
 import main.ResourcesManager;
 
 import java.awt.*;
+import java.io.InputStream;
 
 public class Sprite extends Rectangle {
     protected ImageView skin;
@@ -17,11 +18,14 @@ public class Sprite extends Rectangle {
 
     private double movingXcoefficient;
     private double movingYcoefficient;
+    private boolean isShooting;
+
+    private double timer;
 
     private ResourcesManager resourcesManager;
 
-    public Sprite(Point position, double speed, Type type) {
-        this(position, 64, 32, speed, type);
+    public Sprite(Point position, double size, double speed, Type type) {
+        this(position, size*75, size*27, speed, type);
     }
     public Sprite(Point position, double width, double height, double speed, Type type) {
         super(position.getX(), position.getY(), width, height);
@@ -29,17 +33,19 @@ public class Sprite extends Rectangle {
         this.speed = speed;
         this.type = type;
 
-        Image image = null;
+        InputStream imageStream = null;
         switch (type) {
             case PLAYER:
-                image = new Image(ResourcesManager.getInstance().getFile(FilesName.PLAYER));
+                imageStream = ResourcesManager.getInstance().getFile(FilesName.PLAYER);
                 break;
             case ENEMY:
                 break;
         }
-        this.skin = new ImageView(image);
-        this.setOpacity(0);
-
+        if(imageStream != null) {
+            this.skin = new ImageView(new Image(imageStream, width * 2, height * 2, true, true));
+        }
+        this.setFill(Color.RED);
+        this.setOpacity(100);
     }
 
     public void move(){
@@ -49,10 +55,16 @@ public class Sprite extends Rectangle {
     }
 
     public void updateImagePosition(){
-        double diffX = skin.getImage().getWidth() - getWidth();
-        double diffY = skin.getImage().getHeight() - getHeight();
-        skin.setX(getX()-diffX/2);
-        skin.setY(getY()-diffY/2);
+        if(this.skin != null) {
+            double diffX = skin.getImage().getWidth() - getWidth();
+            double diffY = skin.getImage().getHeight() - getHeight();
+            skin.setX(getX() - diffX / 2);
+            skin.setY(getY() - diffY / 2);
+        }
+    }
+
+    public void increaseTimer(){
+        this.timer += 0.0167;
     }
 
     public void setMovingXcoefficient(double movingXcoefficient) {
@@ -66,10 +78,24 @@ public class Sprite extends Rectangle {
     public ImageView getSkin() {
         return skin;
     }
-}
 
-enum Type {
-    PLAYER,
-    ENEMY,
+    public Point getPosition(){
+        Point position = new Point();
+        position.setLocation(getX(), getY());
+        return position;
+    }
+
+    public Sprite getBullet(){
+        Bullet bullet = new Bullet(this);
+        return bullet;
+    }
+
+    public void setShooting(boolean shooting){
+        this.isShooting = shooting;
+    }
+
+    public boolean isShooting(){
+        return this.isShooting;
+    }
 }
 

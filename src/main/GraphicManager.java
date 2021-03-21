@@ -23,6 +23,10 @@ public class GraphicManager {
 
     private AnimationTimer animationTimer;
 
+    private List<Node> toAdd;
+    private List<Node> toRemove;
+
+
     public GraphicManager(Stage stage){
         stage.setWidth(1280);
         stage.setHeight(720);
@@ -38,8 +42,13 @@ public class GraphicManager {
         this.stage.setResizable(false);
         this.stage.show();
 
+        toAdd = new ArrayList<>();
+        toRemove = new ArrayList<>();
+
         ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
         add(background);
+
+
 
         this.animationTimer = new AnimationTimer() {
             @Override
@@ -67,14 +76,16 @@ public class GraphicManager {
     }
 
     public void add(Node node){
-        if(!pane.getChildren().contains(node)){
+        if(!toAdd.contains(node)){
             if(node instanceof Sprite){
                 Sprite sprite = (Sprite) node;
-                pane.getChildren().add(sprite);
-                pane.getChildren().add(sprite.getSkin());
+                toAdd.add(sprite);
+                if(sprite.getSkin() != null) {
+                    toAdd.add(sprite.getSkin());
+                }
             }
             else {
-                pane.getChildren().add(node);
+                toAdd.add(node);
             }
         }
     }
@@ -82,8 +93,8 @@ public class GraphicManager {
 
 
     public void remove(Node node){
-        if(pane.getChildren().contains(node)){
-            pane.getChildren().remove(node);
+        if(!toRemove.contains(node)){
+            toRemove.add(node);
         }
     }
 
@@ -92,8 +103,21 @@ public class GraphicManager {
             if(node instanceof Sprite){
                 Sprite sprite = (Sprite) node;
                 sprite.move();
+                if(sprite.isShooting()){
+                    add(sprite.getBullet());
+                }
             }
         });
+
+        pane.getChildren().removeAll(toRemove);
+        for (Node node : toAdd) {
+            if(!pane.getChildren().contains(node)){
+                pane.getChildren().add(node);
+            }
+        }
+
+        toRemove.clear();
+        toAdd.clear();
     }
 
     public ImageView getImage(String name, double x, double y, double width, double height){
