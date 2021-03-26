@@ -1,5 +1,6 @@
 package main.classes;
 
+import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -16,13 +17,15 @@ public class Sprite extends Rectangle {
     protected Type type;
     protected double speed;
 
-    private double movingXcoefficient;
-    private double movingYcoefficient;
-    private boolean isShooting;
+    protected double movingXcoefficient;
+    protected double movingYcoefficient;
+    protected boolean isToDelete;
 
-    private double timer;
+    protected AnimationTimer timer;
 
-    private ResourcesManager resourcesManager;
+    protected ResourcesManager resourcesManager;
+
+    private Weapon weapon;
 
     public Sprite(Point position, double size, double speed, Type type) {
         this(position, size*75, size*27, speed, type);
@@ -38,6 +41,9 @@ public class Sprite extends Rectangle {
             case PLAYER:
                 imageStream = ResourcesManager.getInstance().getFile(FilesName.PLAYER);
                 break;
+            case BULLET:
+                imageStream = ResourcesManager.getInstance().getFile(FilesName.BULLET);
+                break;
             case ENEMY:
                 break;
         }
@@ -46,6 +52,27 @@ public class Sprite extends Rectangle {
         }
         this.setFill(Color.RED);
         this.setOpacity(100);
+
+        timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                update();
+            }
+        };
+
+        timer.start();
+    }
+
+    protected void update(){
+
+    }
+
+    public void stopTimer(){
+        this.timer.stop();
+    }
+
+    public boolean isToDelete() {
+        return isToDelete;
     }
 
     public void move(){
@@ -61,10 +88,6 @@ public class Sprite extends Rectangle {
             skin.setX(getX() - diffX / 2);
             skin.setY(getY() - diffY / 2);
         }
-    }
-
-    public void increaseTimer(){
-        this.timer += 0.0167;
     }
 
     public void setMovingXcoefficient(double movingXcoefficient) {
@@ -83,19 +106,6 @@ public class Sprite extends Rectangle {
         Point position = new Point();
         position.setLocation(getX(), getY());
         return position;
-    }
-
-    public Sprite getBullet(){
-        Bullet bullet = new Bullet(this);
-        return bullet;
-    }
-
-    public void setShooting(boolean shooting){
-        this.isShooting = shooting;
-    }
-
-    public boolean isShooting(){
-        return this.isShooting;
     }
 }
 

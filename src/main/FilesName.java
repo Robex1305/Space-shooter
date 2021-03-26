@@ -6,5 +6,6 @@ public class FilesName {
 
     public static String BACKGROUND = imagesFolder + "background.jpg";
     public static String PLAYER = imagesFolder + "spaceship.gif";
+    public static String BULLET = imagesFolder + "bullet.png";
     public static String STAR = imagesFolder + "star.png";
 }

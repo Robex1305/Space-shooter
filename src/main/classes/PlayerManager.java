@@ -10,11 +10,13 @@ import java.awt.*;
 
 public class PlayerManager {
 
-    private Sprite player;
+    private Character player;
     private boolean isMovingUp;
     private boolean isMovingDown;
     private boolean isMovingLeft;
     private boolean isMovingRight;
+
+
 
     private Point spawnPoint;
 
@@ -27,7 +29,8 @@ public class PlayerManager {
 
         spawnPoint = new Point();
         spawnPoint.setLocation(50,graphicManager.getPane().getHeight()/2);
-        player = new Sprite(spawnPoint, 1, 3, Type.PLAYER);
+        player = new Character(spawnPoint, 1, 3, Type.PLAYER);
+        player.getWeapon().setRateOfFire(7);
 
         isMovingUp = false;
         isMovingDown = false;
@@ -51,7 +54,7 @@ public class PlayerManager {
                         isMovingRight = true;
                         break;
                     case SPACE:
-                        player.setShooting(true);
+                        player.setIsShooting(true);
                         break;
                 }
                 updatePlayerCoefficients();
@@ -75,12 +78,13 @@ public class PlayerManager {
                         isMovingRight = false;
                         break;
                     case SPACE:
-                        player.setShooting(false);
+                        player.setIsShooting(false);
                         break;
                 }
                 updatePlayerCoefficients();
             }
         });
+
     }
 
     public void updatePlayerCoefficients() {
@@ -99,12 +103,6 @@ public class PlayerManager {
         else{
             player.setMovingYcoefficient(0);
         }
-    }
-
-    public void shoot(){
-        Sprite bullet = new Sprite(player.getPosition(),0.2, 3, Type.BULLET);
-        bullet.setMovingXcoefficient(1);
-        graphicManager.add(bullet);
     }
 
     public Sprite getPlayer() {

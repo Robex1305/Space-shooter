@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import main.classes.Character;
 import main.classes.Sprite;
 
 import java.io.File;
@@ -26,6 +27,7 @@ public class GraphicManager {
     private List<Node> toAdd;
     private List<Node> toRemove;
 
+    final public static double FRAME_TIME = 0.0167;
 
     public GraphicManager(Stage stage){
         stage.setWidth(1280);
@@ -103,13 +105,25 @@ public class GraphicManager {
             if(node instanceof Sprite){
                 Sprite sprite = (Sprite) node;
                 sprite.move();
-                if(sprite.isShooting()){
-                    add(sprite.getBullet());
+
+                if(sprite instanceof Character){
+                    Character character = (Character) sprite;
+                    character.getSpritesToAdd().forEach(this::add);
+                }
+
+                if(sprite.isToDelete()){
+                    toRemove.add(sprite);
+                    toRemove.add(sprite.getSkin());
                 }
             }
         });
 
-        pane.getChildren().removeAll(toRemove);
+        toRemove.forEach(n -> {
+            if(n instanceof Sprite){
+                ((Sprite) n).stopTimer();
+            }
+            pane.getChildren().remove(n);
+        });
         for (Node node : toAdd) {
             if(!pane.getChildren().contains(node)){
                 pane.getChildren().add(node);
