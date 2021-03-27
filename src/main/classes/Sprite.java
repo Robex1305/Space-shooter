@@ -27,6 +27,23 @@ public class Sprite extends Rectangle {
 
     private Weapon weapon;
 
+    public Sprite(double size, double speed, Type type) {
+        this(new Point(), size*16, size*16, speed, type);
+        double random = Math.random();
+        Point p = new Point();
+        if(!Type.PLAYER.equals(type)){
+            p.setLocation(1280, Math.random() * 720);
+            this.movingXcoefficient = -1;
+            this.speed = speed * random;
+        } else {
+            p.setLocation(0, Math.random() * 720);
+            this.movingXcoefficient = 1;
+        }
+        setSize(size * random);
+        setPosition(p);
+
+    }
+
     public Sprite(Point position, double size, double speed, Type type) {
         this(position, size*75, size*27, speed, type);
     }
@@ -39,10 +56,13 @@ public class Sprite extends Rectangle {
         InputStream imageStream = null;
         switch (type) {
             case PLAYER:
-                imageStream = ResourcesManager.getInstance().getFile(FilesName.PLAYER);
+                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.PLAYER);
                 break;
             case BULLET:
-                imageStream = ResourcesManager.getInstance().getFile(FilesName.BULLET);
+                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.BULLET);
+                break;
+            case STAR:
+                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.STAR);
                 break;
             case ENEMY:
                 break;
@@ -51,7 +71,7 @@ public class Sprite extends Rectangle {
             this.skin = new ImageView(new Image(imageStream, width * 2, height * 2, true, true));
         }
         this.setFill(Color.RED);
-        this.setOpacity(100);
+        this.setOpacity(0);
 
         timer = new AnimationTimer() {
             @Override
@@ -81,6 +101,34 @@ public class Sprite extends Rectangle {
         updateImagePosition();
     }
 
+    public void setPosition(double x, double y){
+        Point p = new Point();
+        p.setLocation(x,y);
+        this.setPosition(p);
+    }
+
+    public void setPosition(Point position){
+        this.setPositionX(position.getX());
+        this.setPositionY(position.getY());
+    }
+
+    public void setSize(double size){
+        this.setSize(getWidth()*size, getHeight()*size);
+        updateImage();
+    }
+
+    public void setSize(double width, double height){
+        this.setWidth(width);
+        this.setHeight(height);
+        updateImagePosition();
+    }
+
+    public void updateImage(){
+        this.skin.setFitWidth(getWidth());
+        this.skin.setFitHeight(getHeight());
+        updateImagePosition();
+    }
+
     public void updateImagePosition(){
         if(this.skin != null) {
             double diffX = skin.getImage().getWidth() - getWidth();
@@ -88,6 +136,16 @@ public class Sprite extends Rectangle {
             skin.setX(getX() - diffX / 2);
             skin.setY(getY() - diffY / 2);
         }
+    }
+
+    public void setPositionX(double x){
+        this.setX(x);
+        updateImagePosition();
+    }
+
+    public void setPositionY(double y){
+        this.setY(y);
+        updateImagePosition();
     }
 
     public void setMovingXcoefficient(double movingXcoefficient) {

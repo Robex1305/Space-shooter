@@ -3,6 +3,7 @@ package main.classes;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseDragEvent;
 import javafx.stage.Stage;
 import main.GraphicManager;
 
@@ -29,8 +30,8 @@ public class PlayerManager {
 
         spawnPoint = new Point();
         spawnPoint.setLocation(50,graphicManager.getPane().getHeight()/2);
-        player = new Character(spawnPoint, 1, 3, Type.PLAYER);
-        player.getWeapon().setRateOfFire(7);
+        player = new Character(spawnPoint, 1, 5, Type.PLAYER);
+        player.getWeapon().setRateOfFire(5);
 
         isMovingUp = false;
         isMovingDown = false;
@@ -84,6 +85,34 @@ public class PlayerManager {
                 updatePlayerCoefficients();
             }
         });
+    }
+
+    public void enableMouseControl(boolean enabled){
+        Scene scene = graphicManager.getStage().getScene();
+
+        if(enabled){
+            scene.setOnMouseMoved(event -> {
+                this.player.setPosition(event.getX(), event.getY());
+            });
+
+            scene.setOnMouseDragged(event -> {
+                this.player.setPosition(event.getX(), event.getY());
+            });
+
+            scene.setOnMousePressed(event -> {
+                this.player.setIsShooting(true);
+            });
+
+            scene.setOnMouseReleased(event -> {
+                this.player.setIsShooting(false);
+            });
+        }
+        else{
+            scene.setOnMouseMoved(null);
+            scene.setOnMouseDragged(null);
+            scene.setOnMousePressed(null);
+            scene.setOnMouseReleased(null);
+        }
 
     }
 

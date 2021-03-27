@@ -8,4 +8,7 @@ public class FilesName {
     public static String PLAYER = imagesFolder + "spaceship.gif";
     public static String BULLET = imagesFolder + "bullet.png";
     public static String STAR = imagesFolder + "star.png";
+
+    public static String SHOOT = soundsFolder + "shoot.mp3";
+
 }

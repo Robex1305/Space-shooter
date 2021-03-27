@@ -1,6 +1,7 @@
 package main;
 
 import javafx.animation.AnimationTimer;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -50,7 +51,7 @@ public class GraphicManager {
         ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
         add(background);
 
-
+        scene.setCursor(Cursor.NONE);
 
         this.animationTimer = new AnimationTimer() {
             @Override
@@ -135,7 +136,7 @@ public class GraphicManager {
     }
 
     public ImageView getImage(String name, double x, double y, double width, double height){
-        InputStream imageInputStream = resourcesManager.getFile(name);
+        InputStream imageInputStream = resourcesManager.getFileStream(name);
         Image image = new Image(imageInputStream, width, height, false, true);
         ImageView imageView = new ImageView();
         imageView.setImage(image);

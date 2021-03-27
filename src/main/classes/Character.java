@@ -1,5 +1,8 @@
 package main.classes;
 
+import main.FilesName;
+import main.ResourcesManager;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,7 @@ public class Character extends Sprite {
             Sprite bullet = new Bullet(this);
             if(Type.PLAYER.equals(type)) {
                 bullet.setMovingXcoefficient(1);
+                ResourcesManager.getInstance().playSound(FilesName.SHOOT);
             } else if(Type.ENEMY.equals(type)) {
                 bullet.setMovingXcoefficient(-1);
             }
