@@ -5,11 +5,13 @@ import main.GraphicManager;
 
 public class Weapon {
     private double rateOfFire;
-    private double damages;
+    private Integer damages;
     private AnimationTimer timer;
     private double cooldown;
 
-    public Weapon(double rateOfFire, double damages){
+    public Weapon(){}
+
+    public Weapon(double rateOfFire, Integer damages){
         this.damages = damages;
         this.rateOfFire = rateOfFire;
 
@@ -36,6 +38,14 @@ public class Weapon {
 
     public void setOnCooldown(){
         this.cooldown = calculateCooldown();
+    }
+
+    public void setDamages(Integer damages) {
+        this.damages = damages;
+    }
+
+    public Integer getDamages() {
+        return damages;
     }
 
     public void setRateOfFire(double rateOfFire) {

@@ -1,11 +1,15 @@
-package main.classes;
+package main;
 
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import main.GraphicManager;
+import main.classes.Character;
+import main.classes.Sprite;
+import main.classes.Type;
 
 import java.awt.*;
 
@@ -30,8 +34,8 @@ public class PlayerManager {
 
         spawnPoint = new Point();
         spawnPoint.setLocation(50,graphicManager.getPane().getHeight()/2);
-        player = new Character(spawnPoint, 1, 5, Type.PLAYER);
-        player.getWeapon().setRateOfFire(5);
+        player = new Character(spawnPoint, 1.5,5, Type.PLAYER);
+        player.getWeapon().setRateOfFire(50);
 
         isMovingUp = false;
         isMovingDown = false;
@@ -92,11 +96,11 @@ public class PlayerManager {
 
         if(enabled){
             scene.setOnMouseMoved(event -> {
-                this.player.setPosition(event.getX(), event.getY());
+                moveToCursor(event);
             });
 
             scene.setOnMouseDragged(event -> {
-                this.player.setPosition(event.getX(), event.getY());
+                moveToCursor(event);
             });
 
             scene.setOnMousePressed(event -> {
@@ -114,6 +118,11 @@ public class PlayerManager {
             scene.setOnMouseReleased(null);
         }
 
+    }
+
+    public void moveToCursor(MouseEvent mouseEvent){
+        if(graphicManager.getPane().intersects(mouseEvent.getX(), mouseEvent.getY(), 1, 1))
+        this.player.setPosition(mouseEvent.getX(), mouseEvent.getY());
     }
 
     public void updatePlayerCoefficients() {

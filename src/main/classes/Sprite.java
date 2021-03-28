@@ -4,9 +4,8 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import main.FilesName;
+import main.GraphicManager;
 import main.ResourcesManager;
 
 import java.awt.*;
@@ -16,6 +15,7 @@ public class Sprite extends Rectangle {
     protected ImageView skin;
     protected Type type;
     protected double speed;
+    protected double scale;
 
     protected double movingXcoefficient;
     protected double movingYcoefficient;
@@ -27,51 +27,32 @@ public class Sprite extends Rectangle {
 
     private Weapon weapon;
 
-    public Sprite(double size, double speed, Type type) {
-        this(new Point(), size*16, size*16, speed, type);
-        double random = Math.random();
-        Point p = new Point();
-        if(!Type.PLAYER.equals(type)){
-            p.setLocation(1280, Math.random() * 720);
-            this.movingXcoefficient = -1;
-            this.speed = speed * random;
-        } else {
-            p.setLocation(0, Math.random() * 720);
-            this.movingXcoefficient = 1;
-        }
-        setSize(size * random);
-        setPosition(p);
-
+    public Sprite(double scale, double speed, Type type){
+        this(new Point(), scale, speed, type);
+        this.setPosition(getRandomSpawnpoint());
     }
 
-    public Sprite(Point position, double size, double speed, Type type) {
-        this(position, size*75, size*27, speed, type);
-    }
-    public Sprite(Point position, double width, double height, double speed, Type type) {
-        super(position.getX(), position.getY(), width, height);
+    public Sprite(Point position, double scale, double speed, Type type) {
+        super(position.getX(), position.getY(), 0, 0);
         this.resourcesManager = ResourcesManager.getInstance();
         this.speed = speed;
+        this.scale = scale;
         this.type = type;
 
-        InputStream imageStream = null;
-        switch (type) {
-            case PLAYER:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.PLAYER);
-                break;
-            case BULLET:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.BULLET);
-                break;
-            case STAR:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.STAR);
-                break;
-            case ENEMY:
-                break;
+        Image image = ResourcesManager.getInstance().getAssociatedImage(type, scale);
+
+        if(image != null){
+            this.skin = new ImageView(image);
+            this.skin.setFitWidth(image.getRequestedWidth());
+            this.skin.setFitHeight(image.getRequestedHeight());
+            this.setWidth(image.getRequestedWidth());
+            this.setHeight(image.getRequestedHeight());
+            updateImagePosition();
         }
-        if(imageStream != null) {
-            this.skin = new ImageView(new Image(imageStream, width * 2, height * 2, true, true));
-        }
+
+        //debug hitbox
+        this.setOpacity(1);
         this.setFill(Color.RED);
-        this.setOpacity(0);
 
         timer = new AnimationTimer() {
             @Override
@@ -83,8 +64,21 @@ public class Sprite extends Rectangle {
         timer.start();
     }
 
-    protected void update(){
+    public Point getRandomSpawnpoint(){
+        Point point = new Point();
+        double x = GraphicManager.SCREEN_WIDTH;
+        double y = Math.random() * GraphicManager.SCREEN_HEIGHT*0.8;
+        point.setLocation(x,y);
+        return point;
+    }
 
+    protected void update() {
+        move();
+        if (!Type.PLAYER.equals(type)) {
+            if (getX() < 0) {
+                isToDelete = true;
+            }
+        }
     }
 
     public void stopTimer(){
@@ -112,29 +106,26 @@ public class Sprite extends Rectangle {
         this.setPositionY(position.getY());
     }
 
-    public void setSize(double size){
-        this.setSize(getWidth()*size, getHeight()*size);
-        updateImage();
-    }
+    public void changeSkin(InputStream imageStream, double rotate, double dx, double dy){
+        Image image = new Image(imageStream, getWidth(), getHeight(), false, true);
+        this.getSkin().setImage(image);
 
-    public void setSize(double width, double height){
-        this.setWidth(width);
-        this.setHeight(height);
-        updateImagePosition();
-    }
+        if(dx != 0){
+            this.getSkin().setX(this.getSkin().getX() + dx);
+        }
 
-    public void updateImage(){
-        this.skin.setFitWidth(getWidth());
-        this.skin.setFitHeight(getHeight());
-        updateImagePosition();
+        if(dy != 0){
+            this.getSkin().setX(this.getSkin().getY() + dy);
+        }
+
+        this.getSkin().setRotate(rotate);
+
     }
 
     public void updateImagePosition(){
         if(this.skin != null) {
-            double diffX = skin.getImage().getWidth() - getWidth();
-            double diffY = skin.getImage().getHeight() - getHeight();
-            skin.setX(getX() - diffX / 2);
-            skin.setY(getY() - diffY / 2);
+            skin.setX(getX());
+            skin.setY(getY());
         }
     }
 
@@ -164,6 +155,15 @@ public class Sprite extends Rectangle {
         Point position = new Point();
         position.setLocation(getX(), getY());
         return position;
+    }
+
+    public boolean colide(Sprite sprite){
+        if(this.getBoundsInParent().intersects(sprite.getBoundsInParent())){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
 

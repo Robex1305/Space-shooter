@@ -1,22 +1,27 @@
 package main;
 
 import javafx.animation.AnimationTimer;
+import javafx.scene.Node;
 import javafx.stage.Stage;
-import main.classes.Bullet;
-import main.classes.PlayerManager;
-import main.classes.Sprite;
-import main.classes.Type;
+import main.classes.*;
+import main.classes.Character;
 
 import java.awt.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GameManager {
     protected GraphicManager graphicManager;
     protected PlayerManager playerManager;
+    protected NpcManager npcManager;
     protected AnimationTimer timer;
+    protected double time;
 
     public GameManager(Stage primaryStage){
         graphicManager = new GraphicManager(primaryStage);
         playerManager = new PlayerManager(graphicManager);
+        npcManager = new NpcManager(graphicManager);
+
         playerManager.enableMouseControl(true);
 
         timer = new AnimationTimer() {
@@ -27,12 +32,33 @@ public class GameManager {
         };
     }
 
-    public void update(){
-        if(Math.random() < 0.1) {
-            Sprite star = new Sprite(1, 10, Type.STAR);
-            star.toBack();
+    public void update() {
+        time += GraphicManager.FRAME_TIME;
+        playerManager.getPlayer().getSkin().toFront();
+        if (Math.random() < 0.05) {
+            Point p = new Point();
+            Sprite star = new Sprite(5, 5, Type.STAR);
             graphicManager.add(star);
         }
+        if (hasTimePassed(3000)) {
+            int level = (int) (1 + Math.random() * 3);
+            Character enemy = npcManager.spawnEnemy(level);
+        }
+
+        for(Bullet b : graphicManager.getBullets()){
+            for(Character c : graphicManager.getCharacters()){
+                b.checkColides(c);
+            }
+        }
+    }
+
+    public boolean hasTimePassed(double millisecond){
+        if(time != 0) {
+            if (time % (millisecond/1000) <= GraphicManager.FRAME_TIME) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void start(){

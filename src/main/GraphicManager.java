@@ -8,6 +8,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import main.classes.Bullet;
 import main.classes.Character;
 import main.classes.Sprite;
 
@@ -28,7 +29,12 @@ public class GraphicManager {
     private List<Node> toAdd;
     private List<Node> toRemove;
 
+    private List<Bullet> bullets;
+    private List<Character> characters;
+
     final public static double FRAME_TIME = 0.0167;
+    final public static double SCREEN_WIDTH = 1280;
+    final public static double SCREEN_HEIGHT = 720;
 
     public GraphicManager(Stage stage){
         stage.setWidth(1280);
@@ -47,6 +53,8 @@ public class GraphicManager {
 
         toAdd = new ArrayList<>();
         toRemove = new ArrayList<>();
+        characters = new ArrayList<>();
+        bullets = new ArrayList<>();
 
         ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
         add(background);
@@ -91,13 +99,46 @@ public class GraphicManager {
                 toAdd.add(node);
             }
         }
+
+        if(node instanceof Character){
+            Character c = (Character) node;
+            if(!characters.contains(c)){
+                characters.add(c);
+            }
+        }
+
+        if(node instanceof Bullet){
+            Bullet b = (Bullet) node;
+            if(!bullets.contains(b)){
+                bullets.add(b);
+            }
+        }
     }
 
+    public List<Bullet> getBullets() {
+        return bullets;
+    }
 
+    public List<Character> getCharacters() {
+        return characters;
+    }
 
     public void remove(Node node){
         if(!toRemove.contains(node)){
             toRemove.add(node);
+        }
+        if(node instanceof Character){
+            Character c = (Character) node;
+            if(characters.contains(c)){
+                characters.remove(c);
+            }
+        }
+
+        if(node instanceof Bullet){
+            Bullet b = (Bullet) node;
+            if(bullets.contains(b)){
+                bullets.remove(b);
+            }
         }
     }
 
@@ -105,7 +146,6 @@ public class GraphicManager {
         pane.getChildren().forEach(node -> {
             if(node instanceof Sprite){
                 Sprite sprite = (Sprite) node;
-                sprite.move();
 
                 if(sprite instanceof Character){
                     Character character = (Character) sprite;
@@ -113,8 +153,8 @@ public class GraphicManager {
                 }
 
                 if(sprite.isToDelete()){
-                    toRemove.add(sprite);
-                    toRemove.add(sprite.getSkin());
+                    remove(sprite);
+                    remove(sprite.getSkin());
                 }
             }
         });
@@ -122,6 +162,12 @@ public class GraphicManager {
         toRemove.forEach(n -> {
             if(n instanceof Sprite){
                 ((Sprite) n).stopTimer();
+            }
+            else if(n instanceof Character){
+                characters.remove(n);
+            }
+            else if(n instanceof Bullet){
+                bullets.remove(n);
             }
             pane.getChildren().remove(n);
         });
