@@ -1,11 +1,6 @@
 package main.classes;
 
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import main.GraphicManager;
-import main.ResourcesManager;
-
-import java.awt.*;
 
 public class Bullet extends Sprite{
     private Character source;
@@ -13,11 +8,11 @@ public class Bullet extends Sprite{
     private boolean lifespanElapsed;
 
 
-    public Bullet(Character source, double scale, Type type) {
-        super(source.getPosition(),scale, 6, type);
+    public Bullet(Character source, double scale, SpriteType spriteType) {
+        super(source.getPosition(),scale, 6, spriteType);
         this.source = source;
 
-        if(Type.PLAYER.equals(source.type)) {
+        if(SpriteType.PLAYER.equals(source.spriteType)) {
             this.setMovingXcoefficient(1);
             this.setPositionY(source.getY() + source.getHeight()/2);
             this.setPositionX(source.getX() + source.getSkin().getImage().getWidth());
@@ -50,15 +45,15 @@ public class Bullet extends Sprite{
     }
 
 
-    public boolean checkColides(Sprite sprite) {
+    public boolean checkColides(Character character) {
         if(!lifespanElapsed) {
-            if ((sprite instanceof Character) && sprite != source) {
+            if (character.getCharacterType() != source.getCharacterType()) {
 
-                boolean colides = super.colide(sprite);
+                boolean colides = super.colide(character);
                 if (colides) {
                     lifespan = 0;
                     lifespanElapsed = true;
-                    ((Character) sprite).takeDamages(this);
+                    character.takeDamages(this);
                 }
                 return colides;
             }

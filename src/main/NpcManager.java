@@ -1,38 +1,24 @@
 package main;
 
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import main.GraphicManager;
+import main.classes.*;
 import main.classes.Character;
-import main.classes.Type;
-import main.classes.Weapon;
-
-import java.awt.*;
 
 public class NpcManager {
 
+    private Sprite currentPlayer;
     private GraphicManager graphicManager;
 
-    public NpcManager(GraphicManager graphicManager) {
+    public NpcManager(GraphicManager graphicManager, Sprite currentPlayer) {
         this.graphicManager = graphicManager;
+        this.currentPlayer = currentPlayer;
     }
 
     public Character spawnEnemy(int level){
-        Character enemy = null;
+        Enemy enemy = new Enemy(level);
 
-        if(level == 1){
-            enemy = new Character(1, Type.ENEMY1);
-            enemy.setWeapon(new Weapon(0.2,1));
-        } else if(level == 2){
-            enemy = new Character(1, Type.ENEMY2);
-            enemy.setWeapon(new Weapon(0.5,1));
-        } else if(level == 3){
-            enemy = new Character(1, Type.ENEMY3);
-            enemy.setWeapon(new Weapon(0.3,3));
-        } else if(level == 4){
-            enemy = new Character(1, Type.ENEMY4);
-            enemy.setWeapon(new Weapon(0.5,5));
-        }
+
+        assert enemy != null;
+        enemy.setTarget(currentPlayer);
         enemy.setIsShooting(true);
         graphicManager.add(enemy);
         return enemy;

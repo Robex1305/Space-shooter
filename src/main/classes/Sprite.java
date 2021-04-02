@@ -6,6 +6,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import main.GraphicManager;
+import main.PlayerManager;
 import main.ResourcesManager;
 
 import java.awt.*;
@@ -13,7 +14,7 @@ import java.io.InputStream;
 
 public class Sprite extends Rectangle {
     protected ImageView skin;
-    protected Type type;
+    protected SpriteType spriteType;
     protected double speed;
     protected double scale;
 
@@ -27,31 +28,23 @@ public class Sprite extends Rectangle {
 
     private Weapon weapon;
 
-    public Sprite(double scale, double speed, Type type){
-        this(new Point(), scale, speed, type);
+    public Sprite(double scale, double speed, SpriteType spriteType){
+        this(new Point(), scale, speed, spriteType);
         this.setPosition(getRandomSpawnpoint());
     }
 
-    public Sprite(Point position, double scale, double speed, Type type) {
+    public Sprite(Point position, double scale, double speed, SpriteType spriteType) {
         super(position.getX(), position.getY(), 0, 0);
         this.resourcesManager = ResourcesManager.getInstance();
         this.speed = speed;
         this.scale = scale;
-        this.type = type;
+        this.spriteType = spriteType;
 
-        Image image = ResourcesManager.getInstance().getAssociatedImage(type, scale);
-
-        if(image != null){
-            this.skin = new ImageView(image);
-            this.skin.setFitWidth(image.getRequestedWidth());
-            this.skin.setFitHeight(image.getRequestedHeight());
-            this.setWidth(image.getRequestedWidth());
-            this.setHeight(image.getRequestedHeight());
-            updateImagePosition();
-        }
+        this.skin = new ImageView();
+        loadSkin();
 
         //debug hitbox
-        this.setOpacity(1);
+        this.setOpacity(0);
         this.setFill(Color.RED);
 
         timer = new AnimationTimer() {
@@ -64,6 +57,9 @@ public class Sprite extends Rectangle {
         timer.start();
     }
 
+
+
+
     public Point getRandomSpawnpoint(){
         Point point = new Point();
         double x = GraphicManager.SCREEN_WIDTH;
@@ -74,8 +70,8 @@ public class Sprite extends Rectangle {
 
     protected void update() {
         move();
-        if (!Type.PLAYER.equals(type)) {
-            if (getX() < 0) {
+        if (!SpriteType.PLAYER.equals(spriteType)) {
+            if (getX() + getWidth() < 0) {
                 isToDelete = true;
             }
         }
@@ -106,8 +102,34 @@ public class Sprite extends Rectangle {
         this.setPositionY(position.getY());
     }
 
-    public void changeSkin(InputStream imageStream, double rotate, double dx, double dy){
-        Image image = new Image(imageStream, getWidth(), getHeight(), false, true);
+
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    public SpriteType getSpriteType() {
+        return spriteType;
+    }
+
+    public void setSpriteType(SpriteType spriteType) {
+        this.spriteType = spriteType;
+    }
+
+    public void loadSkin(){
+        loadSkin(0,0,0);
+    }
+
+    public void loadSkin(double rotate, double dx, double dy){
+        Image image = ResourcesManager.getInstance().getAssociatedImage(spriteType, scale);
+        this.skin.setFitWidth(image.getRequestedWidth());
+        this.skin.setFitHeight(image.getRequestedHeight());
+        this.setWidth(image.getRequestedWidth());
+        this.setHeight(image.getRequestedHeight());
+
+        if(this.skin == null){
+            this.skin = new ImageView();
+        }
         this.getSkin().setImage(image);
 
         if(dx != 0){
@@ -119,7 +141,7 @@ public class Sprite extends Rectangle {
         }
 
         this.getSkin().setRotate(rotate);
-
+        this.updateImagePosition();
     }
 
     public void updateImagePosition(){

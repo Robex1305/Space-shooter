@@ -1,14 +1,11 @@
 package main;
 
 import javafx.animation.AnimationTimer;
-import javafx.scene.Node;
 import javafx.stage.Stage;
 import main.classes.*;
 import main.classes.Character;
 
 import java.awt.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class GameManager {
     protected GraphicManager graphicManager;
@@ -20,8 +17,7 @@ public class GameManager {
     public GameManager(Stage primaryStage){
         graphicManager = new GraphicManager(primaryStage);
         playerManager = new PlayerManager(graphicManager);
-        npcManager = new NpcManager(graphicManager);
-
+        npcManager = new NpcManager(graphicManager, playerManager.getPlayer());
         playerManager.enableMouseControl(true);
 
         timer = new AnimationTimer() {
@@ -33,23 +29,36 @@ public class GameManager {
     }
 
     public void update() {
+
         time += GraphicManager.FRAME_TIME;
         playerManager.getPlayer().getSkin().toFront();
         if (Math.random() < 0.05) {
             Point p = new Point();
-            Sprite star = new Sprite(5, 5, Type.STAR);
+            Sprite star = new Sprite(5, 5, SpriteType.STAR);
             graphicManager.add(star);
         }
         if (hasTimePassed(3000)) {
             int level = (int) (1 + Math.random() * 3);
-            Character enemy = npcManager.spawnEnemy(level);
+            npcManager.spawnEnemy(level);
         }
 
         for(Bullet b : graphicManager.getBullets()){
             for(Character c : graphicManager.getCharacters()){
-                b.checkColides(c);
+                if(b.checkColides(c)) {
+                    if (CharacterType.PLAYER.equals(c.getCharacterType())) {
+                        graphicManager.updatePlayerLife();
+                    } else if (CharacterType.ENEMY.equals(c.getCharacterType())) {
+                        Enemy e = (Enemy) c;
+                        if (c.isToDelete()) {
+                            playerManager.addPlayerScore(100 * e.getLevel());
+                            graphicManager.updatePlayerScore(playerManager.getPlayerScore());
+                        }
+                    }
+                }
             }
         }
+
+
     }
 
     public boolean hasTimePassed(double millisecond){
@@ -62,9 +71,13 @@ public class GameManager {
     }
 
     public void start(){
-        graphicManager.add(playerManager.getPlayer());
+        playerManager.setPlayerScore(0);
+        graphicManager.setPlayer(playerManager.getPlayer());
+        graphicManager.updatePlayerScore(0);
+        graphicManager.updatePlayerLife();
         graphicManager.start();
         timer.start();
+
     }
 
 }

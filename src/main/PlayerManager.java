@@ -3,19 +3,19 @@ package main;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import main.GraphicManager;
 import main.classes.Character;
 import main.classes.Sprite;
-import main.classes.Type;
+import main.classes.SpriteType;
 
 import java.awt.*;
 
 public class PlayerManager {
 
     private Character player;
+    private Integer playerScore;
+
     private boolean isMovingUp;
     private boolean isMovingDown;
     private boolean isMovingLeft;
@@ -34,8 +34,8 @@ public class PlayerManager {
 
         spawnPoint = new Point();
         spawnPoint.setLocation(50,graphicManager.getPane().getHeight()/2);
-        player = new Character(spawnPoint, 1.5,5, Type.PLAYER);
-        player.getWeapon().setRateOfFire(50);
+        player = new Character(spawnPoint, 1.5,5, SpriteType.PLAYER);
+        player.getWeapon().setRateOfFire(5);
 
         isMovingUp = false;
         isMovingDown = false;
@@ -91,6 +91,18 @@ public class PlayerManager {
         });
     }
 
+    public Integer getPlayerScore() {
+        return playerScore;
+    }
+
+    public void setPlayerScore(Integer playerScore) {
+        this.playerScore = playerScore;
+    }
+
+    public void addPlayerScore(Integer scoreToAdd){
+        this.setPlayerScore(playerScore + scoreToAdd);
+    }
+
     public void enableMouseControl(boolean enabled){
         Scene scene = graphicManager.getStage().getScene();
 
@@ -143,7 +155,7 @@ public class PlayerManager {
         }
     }
 
-    public Sprite getPlayer() {
+    public Character getPlayer() {
         return player;
     }
 

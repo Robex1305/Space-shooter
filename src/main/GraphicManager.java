@@ -7,6 +7,9 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import main.classes.Bullet;
 import main.classes.Character;
@@ -31,6 +34,11 @@ public class GraphicManager {
 
     private List<Bullet> bullets;
     private List<Character> characters;
+
+    private Text playerLife;
+    private Text playerScore;
+
+    private Character player;
 
     final public static double FRAME_TIME = 0.0167;
     final public static double SCREEN_WIDTH = 1280;
@@ -58,6 +66,7 @@ public class GraphicManager {
 
         ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
         add(background);
+        background.toBack();
 
         scene.setCursor(Cursor.NONE);
 
@@ -68,6 +77,42 @@ public class GraphicManager {
             }
         };
 
+        playerLife = new Text();
+        playerLife.setX(SCREEN_WIDTH/2);
+        playerLife.setY(30);
+        playerLife.setFill(Color.RED);
+
+        playerScore = new Text();
+        playerScore.setX(20);
+        playerScore.setY(30);
+        playerScore.setFill(Color.WHITE);
+
+        this.playerScore.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
+        this.playerLife.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
+        add(playerScore);
+        add(playerLife);
+    }
+
+    public void setPlayer(Character player) {
+        this.player = player;
+        add(player);
+    }
+
+    public void updatePlayerScore(Integer score){
+        this.playerScore.setText("Score: " + score);
+    }
+
+    public void updatePlayerLife(){
+        if(player.getLife() > 0) {
+            StringBuilder lifeBar = new StringBuilder();
+            for (int i = 0; i < player.getLife(); i++) {
+                lifeBar.append("♥");
+            }
+            playerLife.setText(lifeBar.toString());
+        }
+        else{
+            playerLife.setText("GAME OVER");
+        }
     }
 
     public Pane getPane(){

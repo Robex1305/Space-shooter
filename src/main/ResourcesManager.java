@@ -1,18 +1,14 @@
 package main;
 
-import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import javafx.scene.image.Image;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import jdk.internal.util.xml.impl.Input;
-import main.classes.Type;
+import main.classes.SpriteType;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
 
 public class ResourcesManager {
 
@@ -55,55 +51,9 @@ public class ResourcesManager {
         }
     }
 
-    public Image getAssociatedImage(Type type, double scale) {
-        InputStream imageStream = null;
-        InputStream imageStreamForAnalizys = null;
-        switch (type) {
-            case PLAYER:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.PLAYER);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.PLAYER);
-                break;
-            case PLAYER_BULLET:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.PLAYER_BULLET);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.PLAYER_BULLET);
-                break;
-            case ENEMY1_BULLET:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY1_BULLET);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY1_BULLET);
-                break;
-            case ENEMY2_BULLET:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY2_BULLET);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY2_BULLET);
-                break;
-            case ENEMY3_BULLET:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY3_BULLET);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY3_BULLET);
-                break;
-            case ENEMY4_BULLET:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY4_BULLET);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY4_BULLET);
-                break;
-            case STAR:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.STAR);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.STAR);
-                break;
-            case ENEMY1:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY1);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY1);
-                break;
-            case ENEMY2:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY2);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY2);
-                break;
-            case ENEMY3:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY3);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY3);
-                break;
-            case ENEMY4:
-                imageStream = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY4);
-                imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(FilesName.ENEMY4);
-                break;
-        }
+    public Image getAssociatedImage(SpriteType spriteType, double scale) {
+        InputStream imageStream = ResourcesManager.getInstance().getFileStream(spriteType.getModel());
+        InputStream imageStreamForAnalizys = ResourcesManager.getInstance().getFileStream(spriteType.getModel());
 
         Image image = null;
         try {

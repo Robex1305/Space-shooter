@@ -3,7 +3,9 @@ package main;
 public class FilesName {
     private static String imagesFolder = "./main/resources/images/";
     private static String soundsFolder = "./main/resources/sounds/";
+    private static String fontsFolder = "./main/resources/fonts/";
 
+    public static String DEFAULT = imagesFolder + "default.png";
     public static String BACKGROUND = imagesFolder + "background.jpg";
     public static String PLAYER = imagesFolder + "spaceship.gif";
     public static String ENEMY1 = imagesFolder + "enemy1.png";
@@ -19,5 +21,7 @@ public class FilesName {
     public static String STAR = imagesFolder + "star.png";
 
     public static String SHOOT = soundsFolder + "shoot.mp3";
+
+    public static String FONT = fontsFolder + "PressStart2P-vaV7.ttf";
 
 }

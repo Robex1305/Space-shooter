@@ -48,6 +48,10 @@ public class Weapon {
         return damages;
     }
 
+    public double getRateOfFire() {
+        return rateOfFire;
+    }
+
     public void setRateOfFire(double rateOfFire) {
         this.rateOfFire = rateOfFire;
     }
