@@ -6,11 +6,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import main.GraphicManager;
-import main.PlayerManager;
 import main.ResourcesManager;
 
 import java.awt.*;
-import java.io.InputStream;
 
 public class Sprite extends Rectangle {
     protected ImageView skin;
@@ -30,7 +28,6 @@ public class Sprite extends Rectangle {
 
     public Sprite(double scale, double speed, SpriteType spriteType){
         this(new Point(), scale, speed, spriteType);
-        this.setPosition(getRandomSpawnpoint());
     }
 
     public Sprite(Point position, double scale, double speed, SpriteType spriteType) {
@@ -57,17 +54,6 @@ public class Sprite extends Rectangle {
         timer.start();
     }
 
-
-
-
-    public Point getRandomSpawnpoint(){
-        Point point = new Point();
-        double x = GraphicManager.SCREEN_WIDTH;
-        double y = Math.random() * GraphicManager.SCREEN_HEIGHT*0.8;
-        point.setLocation(x,y);
-        return point;
-    }
-
     protected void update() {
         move();
         if (!SpriteType.PLAYER.equals(spriteType)) {
@@ -79,6 +65,10 @@ public class Sprite extends Rectangle {
 
     public void stopTimer(){
         this.timer.stop();
+    }
+
+    public void setToDelete(boolean toDelete) {
+        isToDelete = toDelete;
     }
 
     public boolean isToDelete() {
@@ -108,12 +98,17 @@ public class Sprite extends Rectangle {
         this.speed = speed;
     }
 
+    public double getSpeed() {
+        return speed;
+    }
+
     public SpriteType getSpriteType() {
         return spriteType;
     }
 
     public void setSpriteType(SpriteType spriteType) {
         this.spriteType = spriteType;
+        loadSkin();
     }
 
     public void loadSkin(){

@@ -2,18 +2,17 @@ package main.classes;
 
 import main.GraphicManager;
 
-public class Bullet extends Sprite{
+public class Bullet extends TemporarySprite{
     private Character source;
-    private double lifespan;
-    private boolean lifespanElapsed;
 
 
     public Bullet(Character source, double scale, SpriteType spriteType) {
-        super(source.getPosition(),scale, 6, spriteType);
+        super(source.getPosition(),scale, 6, spriteType, 5);
         this.source = source;
 
         if(SpriteType.PLAYER.equals(source.spriteType)) {
             this.setMovingXcoefficient(1);
+            this.speed = 10;
             this.setPositionY(source.getY() + source.getHeight()/2);
             this.setPositionX(source.getX() + source.getSkin().getImage().getWidth());
         }
@@ -30,19 +29,7 @@ public class Bullet extends Sprite{
         lifespanElapsed = false;
     }
 
-    @Override
-    public void update() {
-        super.update();
-        lifespan += GraphicManager.FRAME_TIME;
-        if(lifespan >= 5){
-            lifespanElapsed = true;
-        }
-    }
 
-    @Override
-    public boolean isToDelete() {
-        return lifespanElapsed || getX() > GraphicManager.SCREEN_WIDTH;
-    }
 
 
     public boolean checkColides(Character character) {
@@ -53,7 +40,7 @@ public class Bullet extends Sprite{
                 if (colides) {
                     lifespan = 0;
                     lifespanElapsed = true;
-                    character.takeDamages(this);
+                    character.takeDamages(this.getSource().getWeapon().getDamages());
                 }
                 return colides;
             }

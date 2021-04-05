@@ -1,7 +1,6 @@
 package main.classes;
 
 import main.FilesName;
-import main.GraphicManager;
 import main.ResourcesManager;
 
 import java.awt.*;
@@ -19,26 +18,21 @@ public class Character extends Sprite {
         this(new Point(), speed, spriteType);
     }
     public Character(Point position, double speed, SpriteType spriteType) {
-        this(position, 2, speed, spriteType);
+        this(position, 1.5, speed, spriteType);
     }
     public Character(Point position, double scale, double speed, SpriteType spriteType) {
         super(position, scale, speed, spriteType);
         spritesToAdd = new ArrayList<>();
-        this.weapon = new Weapon(1,1);
         this.life = 10;
 
-        Point p = new Point();
-
         if(SpriteType.PLAYER.equals(spriteType)){
-            p.setLocation(0, GraphicManager.SCREEN_HEIGHT/2);
             characterType = CharacterType.PLAYER;
+            this.weapon = new Weapon(3,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
         } else {
-            p.setLocation(GraphicManager.SCREEN_WIDTH, Math.random() * 720);
             this.movingXcoefficient = -1;
             characterType = CharacterType.ENEMY;
+            this.weapon = new Weapon(1,1);
         }
-
-        setPosition(p);
     }
 
     public Weapon getWeapon() {
@@ -49,8 +43,12 @@ public class Character extends Sprite {
         this.weapon = weapon;
     }
 
+    public void setLife(Integer life) {
+        this.life = life;
+    }
+
     public Integer getLife() {
-        return life;
+        return this.life;
     }
 
     public void setIsShooting(boolean shooting){
@@ -61,32 +59,47 @@ public class Character extends Sprite {
     public void shoot(){
         if(this.weapon.canShoot()) {
             Bullet bullet = null;
-            switch (spriteType) {
-                case PLAYER:
-                    bullet = new Bullet(this, 1, SpriteType.PLAYER_BULLET);
-                    bullet.setMovingXcoefficient(1);
-                    ResourcesManager.getInstance().playSound(FilesName.SHOOT);
-                    break;
-                case ENEMY1:
-                    bullet = new Bullet(this,1, SpriteType.ENEMY1_BULLET);
-                    bullet.setMovingXcoefficient(-1);
-                    break;
-                case ENEMY2:
-                    bullet = new Bullet(this,2, SpriteType.ENEMY2_BULLET);
-                    bullet.setMovingXcoefficient(-1);
-                    break;
-                case ENEMY3:
-                    bullet = new Bullet(this,3, SpriteType.ENEMY3_BULLET);
-                    bullet.setMovingXcoefficient(-1);
-                    break;
-                case ENEMY4:
-                    bullet = new Bullet(this,4, SpriteType.ENEMY4_BULLET);
-                    bullet.setMovingXcoefficient(-1);
-                    break;
+
+            if(CharacterType.PLAYER.equals(this.characterType)) {
+                bullet = new Bullet(this, 1, getWeapon().getBulletType());
+                bullet.setMovingXcoefficient(1);
+                bullet.setSpriteType(getWeapon().getBulletType());
+                ResourcesManager.getInstance().playSound(getWeapon().getShootingSound(), getWeapon().getVolume());
+            }
+            else {
+                switch (spriteType) {
+                    case ENEMY1:
+                        bullet = new Bullet(this, 1, SpriteType.ENEMY1_BULLET);
+                        break;
+                    case ENEMY2:
+                        bullet = new Bullet(this, 2, SpriteType.ENEMY2_BULLET);
+                        break;
+                    case ENEMY3:
+                        bullet = new Bullet(this, 3, SpriteType.ENEMY3_BULLET);
+                        break;
+                    case ENEMY4:
+                        bullet = new Bullet(this, 4, SpriteType.ENEMY4_BULLET);
+
+                        break;
+                }
+                bullet.setMovingXcoefficient(-1);
             }
 
             spritesToAdd.add(bullet);
             this.weapon.setOnCooldown();
+        }
+    }
+
+    public boolean checkColides(Character character) {
+        if (character.getCharacterType() != getCharacterType()) {
+            boolean colides = super.colide(character);
+            if (colides) {
+                character.takeDamages(life);
+                takeDamages(life);
+            }
+            return colides;
+        } else {
+            return false;
         }
     }
 
@@ -117,8 +130,8 @@ public class Character extends Sprite {
         return  isToDelete;
     }
 
-    public void takeDamages(Bullet bullet){
-        Integer damages = bullet.getSource().getWeapon().getDamages();
+
+    public void takeDamages(int damages){
         this.life -= damages;
     }
 }

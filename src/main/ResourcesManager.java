@@ -13,6 +13,7 @@ import java.net.URL;
 public class ResourcesManager {
 
     private MediaPlayer mediaPlayer;
+    private MediaPlayer backgroundPlayer;
     private Media media;
 
     private static ResourcesManager instance;
@@ -71,14 +72,27 @@ public class ResourcesManager {
         return image;
     }
 
-    public void playSound(String fileName){
-        media = new Media(getFile(FilesName.SHOOT).toURI().toString());
+
+    public void playSound(String fileName, double volumePercentage){
+        media = new Media(getFile(fileName).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
-        mediaPlayer.setVolume(0.02);
+        mediaPlayer.setVolume(volumePercentage/100);
         mediaPlayer.play();
-        mediaPlayer.setOnEndOfMedia(new Runnable() {
+    }
+
+    public void startSoundtrack(double volumePercentage, boolean loopPart){
+        if(!loopPart) {
+            media = new Media(getFile(FilesName.SOUNDTRACK).toURI().toString());
+        }else{
+            media = new Media(getFile(FilesName.SOUNDTRACK_LOOP).toURI().toString());
+        }
+        backgroundPlayer = new MediaPlayer(media);
+        backgroundPlayer.setVolume(volumePercentage/100);
+        backgroundPlayer.play();
+        backgroundPlayer.setOnEndOfMedia(new Runnable() {
             @Override
             public void run() {
+                startSoundtrack(15, true);
             }
         });
     }

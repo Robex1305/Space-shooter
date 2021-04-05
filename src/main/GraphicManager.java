@@ -8,16 +8,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import main.classes.Bullet;
+import main.classes.*;
 import main.classes.Character;
-import main.classes.Sprite;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,28 +39,34 @@ public class GraphicManager {
     private Character player;
 
     final public static double FRAME_TIME = 0.0167;
-    final public static double SCREEN_WIDTH = 1280;
-    final public static double SCREEN_HEIGHT = 720;
+    private double screenWidth;
+    private double screenHeight;
+    private Rectangle veil;
 
     public GraphicManager(Stage stage){
-        stage.setWidth(1280);
-        stage.setHeight(720);
+        toAdd = new ArrayList<>();
+        toRemove = new ArrayList<>();
+        characters = new ArrayList<>();
+        bullets = new ArrayList<>();
+
+        screenWidth = 1600;
+        screenHeight = 900;
+        stage.setWidth(screenWidth);
+        stage.setHeight(screenHeight);
         this.stage = stage;
         this.resourcesManager = ResourcesManager.getInstance();
 
         pane = new Pane();
         pane.setPrefSize(stage.getWidth(),stage.getHeight());
-
         Scene scene = new Scene(pane);
         this.stage.setTitle("Galaxy Fighter");
         this.stage.setScene(scene);
-        this.stage.setResizable(false);
+        this.stage.setResizable(true);
         this.stage.show();
 
-        toAdd = new ArrayList<>();
-        toRemove = new ArrayList<>();
-        characters = new ArrayList<>();
-        bullets = new ArrayList<>();
+
+
+
 
         ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
         add(background);
@@ -78,7 +82,7 @@ public class GraphicManager {
         };
 
         playerLife = new Text();
-        playerLife.setX(SCREEN_WIDTH/2);
+        playerLife.setX(screenWidth /2);
         playerLife.setY(30);
         playerLife.setFill(Color.RED);
 
@@ -96,6 +100,22 @@ public class GraphicManager {
     public void setPlayer(Character player) {
         this.player = player;
         add(player);
+    }
+
+    public double getScreenWidth() {
+        return screenWidth;
+    }
+
+    public void setScreenWidth(double width) {
+        this.screenWidth = width;
+    }
+
+    public double getScreenHeight() {
+        return screenHeight;
+    }
+
+    public void getScreenHeight(double height) {
+        this.screenHeight = height;
     }
 
     public void updatePlayerScore(Integer score){
@@ -208,13 +228,18 @@ public class GraphicManager {
             if(n instanceof Sprite){
                 ((Sprite) n).stopTimer();
             }
-            else if(n instanceof Character){
-                characters.remove(n);
+            if(n instanceof Character){
+                Character c = (Character) n;
+                characters.remove(c);
+                if(c.getLife() <= 0) {
+                    explodeAt(c);
+                }
             }
-            else if(n instanceof Bullet){
+            if(n instanceof Bullet){
                 bullets.remove(n);
             }
             pane.getChildren().remove(n);
+
         });
         for (Node node : toAdd) {
             if(!pane.getChildren().contains(node)){
@@ -224,6 +249,15 @@ public class GraphicManager {
 
         toRemove.clear();
         toAdd.clear();
+    }
+
+    public void explodeAt(Sprite sprite){
+        TemporarySprite explosion = new TemporarySprite(sprite.getPosition(), 1, 0, SpriteType.EXPLOSION, 1);
+        //Using twice the width on purpose to make it square, dependless of the sprite's shape
+        explosion.getSkin().setFitWidth(sprite.getWidth());
+        explosion.getSkin().setFitHeight(sprite.getWidth());
+        ResourcesManager.getInstance().playSound(FilesName.EXPLOSION_MP3,8);
+        add(explosion);
     }
 
     public ImageView getImage(String name, double x, double y, double width, double height){
