@@ -150,6 +150,9 @@ public class Character extends Sprite {
 
 
     public void takeDamages(int damages){
+        if(CharacterType.PLAYER.equals(characterType)){
+            ResourcesManager.getInstance().playSound(FilesName.HIT, 50);
+        }
         this.life -= damages;
     }
 }

@@ -21,7 +21,10 @@ public class FilesName {
     public static String ENEMY4_BULLET = imagesFolder + "enemy4Bullet.png";
     public static String STAR = imagesFolder + "star.png";
     public static String EXPLOSION_GIF = imagesFolder + "explosion.gif";
+    public static String HEART = imagesFolder + "heart.png";
 
+    public static String HEAL = soundsFolder + "heal.mp3";
+    public static String HIT = soundsFolder + "hit.mp3";
     public static String UPGRADE = soundsFolder + "upgrade.mp3";
     public static String SHOOT1 = soundsFolder + "shoot1.mp3";
     public static String SHOOT2 = soundsFolder + "shoot2.mp3";

@@ -18,7 +18,7 @@ public class NpcManager {
 
         assert enemy != null;
         enemy.setTarget(currentPlayer);
-        enemy.setPosition(graphicManager.getScreenWidth(), Math.random() * 720);
+        enemy.setPosition(graphicManager.getScreenWidth(), 50 + Math.random() * (graphicManager.getScreenHeight()-100));
         enemy.setIsShooting(true);
         graphicManager.add(enemy);
         return enemy;

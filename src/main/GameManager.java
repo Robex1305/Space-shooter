@@ -12,6 +12,8 @@ import javafx.util.Duration;
 import main.classes.*;
 import main.classes.Character;
 
+import java.awt.*;
+
 public class GameManager {
     protected Stage stage;
     protected GraphicManager graphicManager;
@@ -48,35 +50,46 @@ public class GameManager {
         this.graphicManager.updatePlayerLife();
         if (playerManager.getPlayer().isAlive()) {
             time += GraphicManager.FRAME_TIME;
-            if (hasTimePassed(2000 - (time / 2) > 100 ? 2000 - (time * 2) : 100)) {
-                double difficulty = 1 + Math.random() * (time / 60);
+            if (hasTimePassed(2000 - time > 100 ? 2000 - time : 100)) {
+                double difficulty = 1 + Math.random() * (time / 90);
                 Character enemy = null;
                 if (difficulty < 4) {
                     enemy = npcManager.spawnEnemy((int) Math.round(difficulty));
                 } else {
                     enemy = npcManager.spawnEnemy(4);
                     boolean additionalSpawning = Math.random() >= 0.5;
-                    if(additionalSpawning){
-                        Character additionalEnemy = npcManager.spawnEnemy((int) (Math.random() * 4));
+                    if (additionalSpawning) {
+                        Character additionalEnemy = npcManager.spawnEnemy((int) (1 + Math.random() * 3));
                         additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
                     }
                 }
                 enemy.setSpeed(enemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
             }
 
+            Character player = playerManager.getPlayer();
+
+            for(Health h : graphicManager.getHealths()){
+                if(h.colide(player) && player.getLife() < 10){
+                    if(!h.isToDelete()) {
+                        player.setLife(player.getLife() + 1);
+                        ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                        h.setToDelete(true);
+                    }
+                }
+            }
+
             /** Bullets Management **/
             for (Bullet b : graphicManager.getBullets()) {
-                if (b.getX() > graphicManager.getScreenWidth() || b.getX() < 0) {
-                    b.setToDelete(true);
-                } else {
-                    for (Character c : graphicManager.getCharacters()) {
-                        if (b.checkColides(c)) {
-                            if (CharacterType.ENEMY.equals(c.getCharacterType())) {
-                                Enemy e = (Enemy) c;
-                                if (c.isToDelete()) {
-                                    playerManager.addPlayerScore(150 * e.getLevel());
-                                    graphicManager.updatePlayerScore(playerManager.getPlayerScore());
+                for (Character c : graphicManager.getCharacters()) {
+                    if (b.checkColides(c)) {
+                        if (CharacterType.ENEMY.equals(c.getCharacterType())) {
+                            Enemy e = (Enemy) c;
+                            if (c.isToDelete()) {
+                                if(Math.random() > 0.98) {
+                                    dropHealth(c);
                                 }
+                                playerManager.addPlayerScore(100 * e.getLevel());
+                                graphicManager.updatePlayerScore(playerManager.getPlayerScore());
                             }
                         }
                     }
@@ -95,6 +108,12 @@ public class GameManager {
         }
     }
 
+    public void dropHealth(Character c){
+        Point p = new Point();
+        p.setLocation(c.getX(), c.getY() + c.getHeight()/2);
+        Health health = new Health(c.getPosition(), 1, 1, SpriteType.HEART);
+        graphicManager.add(health);
+    }
 
     public void reset(){
         ResourcesManager.getInstance().reset();
@@ -126,7 +145,7 @@ public class GameManager {
         veil.setY(0);
         graphicManager.add(veil);
 
-        FadeTransition fadeTransition = new FadeTransition(Duration.millis(3500), veil);
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(5500), veil);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0);
         fadeTransition.setOnFinished(new EventHandler<ActionEvent>() {
@@ -139,7 +158,7 @@ public class GameManager {
                     @Override
                     public void run() {
                         try {
-                            sleep(2000);
+                            sleep(3000);
                             timer.start();
                         } catch (InterruptedException e) {
                             e.printStackTrace();

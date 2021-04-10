@@ -35,7 +35,6 @@ public class Bullet extends TemporarySprite{
     public boolean checkColides(Character character) {
         if(!lifespanElapsed) {
             if (character.getCharacterType() != source.getCharacterType()) {
-
                 boolean colides = super.colide(character);
                 if (colides) {
                     lifespan = 0;

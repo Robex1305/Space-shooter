@@ -17,7 +17,8 @@ public enum SpriteType {
     ENEMY3_BULLET(FilesName.ENEMY3_BULLET),
     ENEMY4_BULLET(FilesName.ENEMY4_BULLET),
     STAR(FilesName.STAR),
-    EXPLOSION(FilesName.EXPLOSION_GIF);
+    EXPLOSION(FilesName.EXPLOSION_GIF),
+    HEART(FilesName.HEART);
 
     String model;
 

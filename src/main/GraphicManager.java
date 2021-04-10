@@ -37,6 +37,7 @@ public class GraphicManager {
 
     private List<Bullet> bullets;
     private List<Character> characters;
+    private List<Health> healths;
 
     private Text playerLife;
     private Text playerScore;
@@ -50,6 +51,7 @@ public class GraphicManager {
         toRemove = new ArrayList<>();
         characters = new ArrayList<>();
         bullets = new ArrayList<>();
+        healths = new ArrayList<>();
 
         this.stage = stage;
         this.stage.setWidth(1280);
@@ -169,6 +171,13 @@ public class GraphicManager {
                 bullets.add(b);
             }
         }
+
+        if(node instanceof Health){
+            Health h = (Health) node;
+            if(!healths.contains(h)){
+                healths.add(h);
+            }
+        }
     }
 
     public List<Bullet> getBullets() {
@@ -196,6 +205,17 @@ public class GraphicManager {
                 bullets.remove(b);
             }
         }
+
+        if(node instanceof Health){
+            Health h = (Health) node;
+            if(healths.contains(h)){
+                healths.remove(h);
+            }
+        }
+    }
+
+    public List<Health> getHealths() {
+        return healths;
     }
 
     public Point getRandomSpawnpoint() {
@@ -207,13 +227,14 @@ public class GraphicManager {
     }
 
     public void update(){
-        if (Math.random() < 0.05) {
-            double rand = Math.random();
-            Sprite star = new Sprite(rand * 0.4, rand * 10, SpriteType.STAR);
-            star.setMovingXcoefficient(-1);
-            star.setPosition(getRandomSpawnpoint());
-            add(star);
-        }
+//        if (Math.random() < 0.05) {
+//            double rand = Math.random();
+//            Sprite star = new Sprite(rand * 0.2, rand * 10, SpriteType.STAR);
+//            star.getSkin().setOpacity(0.5);
+//            star.setMovingXcoefficient(-1);
+//            star.setPosition(getRandomSpawnpoint());
+//            add(star);
+//        }
 
         pane.getChildren().forEach(node -> {
             if(node instanceof Sprite){
@@ -242,11 +263,21 @@ public class GraphicManager {
                     explodeAt(c);
                 }
             }
+            if(n instanceof Enemy){
+                Enemy e = (Enemy) n;
+                if(e.getX() < 0){
+                    e.setToDelete(true);
+                }
+            }
             if(n instanceof Bullet){
+                Bullet b = (Bullet) n;
+                if (b.getX() > getScreenWidth() || b.getX() < 0) {
+                    b.setToDelete(true);
+                }
                 bullets.remove(n);
             }
             pane.getChildren().remove(n);
-            n = null;
+
         });
         for (Node node : toAdd) {
             if(!pane.getChildren().contains(node)){
