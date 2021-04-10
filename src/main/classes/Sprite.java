@@ -26,7 +26,7 @@ public class Sprite extends Rectangle {
 
     private Weapon weapon;
 
-    public Sprite(double scale, double speed, SpriteType spriteType){
+    public Sprite(double scale, double speed, SpriteType spriteType) {
         this(new Point(), scale, speed, spriteType);
     }
 
@@ -55,15 +55,17 @@ public class Sprite extends Rectangle {
     }
 
     protected void update() {
-        move();
-        if (!SpriteType.PLAYER.equals(spriteType)) {
-            if (getX() + getWidth() < 0) {
-                isToDelete = true;
+        if(!isToDelete()) {
+            move();
+            if (!SpriteType.PLAYER.equals(spriteType)) {
+                if (getX() + getWidth() < 0) {
+                    isToDelete = true;
+                }
             }
         }
     }
 
-    public void stopTimer(){
+    public void stopTimer() {
         this.timer.stop();
     }
 
@@ -75,23 +77,22 @@ public class Sprite extends Rectangle {
         return isToDelete;
     }
 
-    public void move(){
+    public void move() {
         setX(getX() + movingXcoefficient * speed);
         setY(getY() + movingYcoefficient * speed);
         updateImagePosition();
     }
 
-    public void setPosition(double x, double y){
+    public void setPosition(double x, double y) {
         Point p = new Point();
-        p.setLocation(x,y);
+        p.setLocation(x, y);
         this.setPosition(p);
     }
 
-    public void setPosition(Point position){
+    public void setPosition(Point position) {
         this.setPositionX(position.getX());
         this.setPositionY(position.getY());
     }
-
 
 
     public void setSpeed(double speed) {
@@ -111,27 +112,27 @@ public class Sprite extends Rectangle {
         loadSkin();
     }
 
-    public void loadSkin(){
-        loadSkin(0,0,0);
+    public void loadSkin() {
+        loadSkin(0, 0, 0);
     }
 
-    public void loadSkin(double rotate, double dx, double dy){
+    public void loadSkin(double rotate, double dx, double dy) {
         Image image = ResourcesManager.getInstance().getAssociatedImage(spriteType, scale);
         this.skin.setFitWidth(image.getRequestedWidth());
         this.skin.setFitHeight(image.getRequestedHeight());
         this.setWidth(image.getRequestedWidth());
         this.setHeight(image.getRequestedHeight());
 
-        if(this.skin == null){
+        if (this.skin == null) {
             this.skin = new ImageView();
         }
         this.getSkin().setImage(image);
 
-        if(dx != 0){
+        if (dx != 0) {
             this.getSkin().setX(this.getSkin().getX() + dx);
         }
 
-        if(dy != 0){
+        if (dy != 0) {
             this.getSkin().setX(this.getSkin().getY() + dy);
         }
 
@@ -139,19 +140,19 @@ public class Sprite extends Rectangle {
         this.updateImagePosition();
     }
 
-    public void updateImagePosition(){
-        if(this.skin != null) {
+    public void updateImagePosition() {
+        if (this.skin != null) {
             skin.setX(getX());
             skin.setY(getY());
         }
     }
 
-    public void setPositionX(double x){
+    public void setPositionX(double x) {
         this.setX(x);
         updateImagePosition();
     }
 
-    public void setPositionY(double y){
+    public void setPositionY(double y) {
         this.setY(y);
         updateImagePosition();
     }
@@ -168,19 +169,19 @@ public class Sprite extends Rectangle {
         return skin;
     }
 
-    public Point getPosition(){
+    public Point getPosition() {
         Point position = new Point();
         position.setLocation(getX(), getY());
         return position;
     }
 
-    public boolean colide(Sprite sprite){
-        if(this.getBoundsInParent().intersects(sprite.getBoundsInParent())){
-            return true;
+    public boolean colide(Sprite sprite) {
+        if (!sprite.isToDelete) {
+            if (this.getBoundsInParent().intersects(sprite.getBoundsInParent())) {
+                return true;
+            }
         }
-        else{
-            return false;
-        }
+        return false;
     }
 }
 

@@ -4,8 +4,6 @@ import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -13,9 +11,6 @@ import main.classes.*;
 import main.classes.Character;
 
 import java.awt.*;
-import java.awt.datatransfer.FlavorEvent;
-import java.util.List;
-import java.util.ArrayList;
 
 public class GameManager {
     protected GraphicManager graphicManager;
@@ -24,7 +19,7 @@ public class GameManager {
     protected AnimationTimer timer;
     protected double time;
 
-    public GameManager(Stage primaryStage){
+    public GameManager(Stage primaryStage) {
         graphicManager = new GraphicManager(primaryStage);
         playerManager = new PlayerManager(graphicManager);
         npcManager = new NpcManager(graphicManager, playerManager.getPlayer());
@@ -37,37 +32,33 @@ public class GameManager {
     }
 
     public void update() {
-        time += GraphicManager.FRAME_TIME;
-        graphicManager.updatePlayerLife();
         if (Math.random() < 0.05) {
             double rand = Math.random();
-            Sprite star = new Sprite(rand*0.4, rand*10, SpriteType.STAR);
+            Sprite star = new Sprite(rand * 0.4, rand * 10, SpriteType.STAR);
             star.setMovingXcoefficient(-1);
             star.setPosition(getRandomSpawnpoint());
             graphicManager.add(star);
         }
-        if (hasTimePassed(1500-(time/2) > 100 ? 1500-(time*2) : 100)) {
+        if (hasTimePassed(1500 - (time / 2) > 100 ? 1500 - (time * 2) : 100)) {
             int level;
-            double difficulty = 1 + Math.random() * (time/60);
-            if(difficulty < 4) {
+            double difficulty = 1 + Math.random() * (time / 60);
+            if (difficulty < 4) {
                 level = (int) Math.round(difficulty);
-            }
-            else {
+            } else {
                 level = 4;
             }
             Character enemy = npcManager.spawnEnemy(level);
-            enemy.setSpeed(enemy.getSpeed() + Math.random()*(time/300 < 2 ? time/300 : 2));
+            enemy.setSpeed(enemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
         }
 
         /** Bullets Management **/
-        for(Bullet b : graphicManager.getBullets()){
-            if(b.getX() > graphicManager.getScreenWidth() || b.getX() < 0){
+        for (Bullet b : graphicManager.getBullets()) {
+            if (b.getX() > graphicManager.getScreenWidth() || b.getX() < 0) {
                 b.setToDelete(true);
-            }
-            else {
+            } else {
                 for (Character c : graphicManager.getCharacters()) {
                     if (b.checkColides(c)) {
-                       if (CharacterType.ENEMY.equals(c.getCharacterType())) {
+                        if (CharacterType.ENEMY.equals(c.getCharacterType())) {
                             Enemy e = (Enemy) c;
                             if (c.isToDelete()) {
                                 playerManager.addPlayerScore(100 * e.getLevel());
@@ -80,16 +71,16 @@ public class GameManager {
         }
     }
 
-    public boolean hasTimePassed(double millisecond){
-        if(time != 0) {
-            if (time % (millisecond/1000) <= GraphicManager.FRAME_TIME) {
+    public boolean hasTimePassed(double millisecond) {
+        if (time != 0) {
+            if (time % (millisecond / 1000) <= GraphicManager.FRAME_TIME) {
                 return true;
             }
         }
         return false;
     }
 
-    public void start(){
+    public void start() {
         playerManager.setPlayerScore(0);
         graphicManager.setPlayer(playerManager.getPlayer());
         graphicManager.updatePlayerScore(0);
@@ -102,7 +93,7 @@ public class GameManager {
         veil.setY(0);
         graphicManager.add(veil);
 
-        FadeTransition fadeTransition = new FadeTransition(Duration.millis(5500),veil);
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(5500), veil);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0);
         fadeTransition.setOnFinished(new EventHandler<ActionEvent>() {
@@ -111,7 +102,7 @@ public class GameManager {
                 playerManager.enableMouseControl(true);
                 playerManager.enableKeyboardControl(true);
                 graphicManager.remove(veil);
-                new Thread(){
+                new Thread() {
                     @Override
                     public void run() {
                         try {
@@ -131,11 +122,11 @@ public class GameManager {
 
     }
 
-    public Point getRandomSpawnpoint(){
+    public Point getRandomSpawnpoint() {
         Point point = new Point();
         double x = graphicManager.getScreenWidth();
-        double y = Math.random() * graphicManager.getScreenHeight() *0.8;
-        point.setLocation(x,y);
+        double y = Math.random() * graphicManager.getScreenHeight() * 0.8;
+        point.setLocation(x, y);
         return point;
     }
 }

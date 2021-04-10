@@ -67,6 +67,7 @@ public class Character extends Sprite {
                 ResourcesManager.getInstance().playSound(getWeapon().getShootingSound(), getWeapon().getVolume());
             }
             else {
+
                 switch (spriteType) {
                     case ENEMY1:
                         bullet = new Bullet(this, 1, SpriteType.ENEMY1_BULLET);
@@ -85,9 +86,22 @@ public class Character extends Sprite {
                 bullet.setMovingXcoefficient(-1);
             }
 
-            spritesToAdd.add(bullet);
-            this.weapon.setOnCooldown();
+            boolean doShoot = true;
+            if(this instanceof Enemy){
+                if(!((Enemy) this).getTarget().isAlive()){
+                    doShoot = false;
+                }
+            }
+
+            if(doShoot) {
+                spritesToAdd.add(bullet);
+                this.weapon.setOnCooldown();
+            }
         }
+    }
+
+    public boolean isAlive(){
+        return life > 0;
     }
 
     public boolean checkColides(Character character) {

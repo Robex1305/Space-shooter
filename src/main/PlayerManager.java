@@ -54,23 +54,23 @@ public class PlayerManager {
 
     public void addPlayerScore(Integer scoreToAdd){
         this.setPlayerScore(playerScore + scoreToAdd);
-        if(unlockedBonuses == 0 && getPlayerScore() >= 200){
+        if(unlockedBonuses == 0 && getPlayerScore() >= 2500){
             this.player.setWeapon(new Weapon(6,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
             unlockedBonuses++;
         }
-        else if(unlockedBonuses == 1 && getPlayerScore() >= 300){
+        else if(unlockedBonuses == 1 && getPlayerScore() >= 5000){
             this.player.setWeapon(new Weapon(2,3, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
             unlockedBonuses++;
         }
-        else if(unlockedBonuses == 2 && getPlayerScore() >= 400){
+        else if(unlockedBonuses == 2 && getPlayerScore() >= 15000){
             this.player.setWeapon(new Weapon(4,3, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
             unlockedBonuses++;
         }
-        else if(unlockedBonuses == 3 && getPlayerScore() >= 500){
+        else if(unlockedBonuses == 3 && getPlayerScore() >= 30000){
             this.player.setWeapon(new Weapon(7,2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
             unlockedBonuses++;
         }
-        else if(unlockedBonuses == 4 && getPlayerScore() >= 600){
+        else if(unlockedBonuses == 4 && getPlayerScore() >= 50000){
             this.player.setWeapon(new Weapon(10,2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
             unlockedBonuses++;
         }
@@ -186,6 +186,10 @@ public class PlayerManager {
 
     public Character getPlayer() {
         return player;
+    }
+
+    public void setPlayer(Character player) {
+        this.player = player;
     }
 
     public boolean isMovingUp() {

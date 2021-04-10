@@ -67,7 +67,7 @@ public class Enemy extends Character{
     @Override
     protected void update() {
         super.update();
-        if(target != null) {
+        if(target != null && target.isAlive()) {
             if (getY() < target.getY()) {
                 setMovingYcoefficient(0.3);
             } else if (getY() > target.getY()) {
