@@ -1,20 +1,25 @@
 package main;
 
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import main.classes.*;
 import main.classes.Character;
 
+import java.awt.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +44,6 @@ public class GraphicManager {
     private Character player;
 
     final public static double FRAME_TIME = 0.0167;
-    private double screenWidth;
-    private double screenHeight;
-    private Rectangle veil;
 
     public GraphicManager(Stage stage){
         toAdd = new ArrayList<>();
@@ -49,11 +51,10 @@ public class GraphicManager {
         characters = new ArrayList<>();
         bullets = new ArrayList<>();
 
-        screenWidth = 1600;
-        screenHeight = 900;
-        stage.setWidth(screenWidth);
-        stage.setHeight(screenHeight);
         this.stage = stage;
+        this.stage.setWidth(1280);
+        this.stage.setHeight(720);
+
         this.resourcesManager = ResourcesManager.getInstance();
 
         pane = new Pane();
@@ -61,12 +62,10 @@ public class GraphicManager {
         Scene scene = new Scene(pane);
         this.stage.setTitle("Galaxy Fighter");
         this.stage.setScene(scene);
-        this.stage.setResizable(true);
-        this.stage.show();
-
-
-
-
+        this.stage.setResizable(false);
+        if(!this.stage.isShowing()) {
+            this.stage.show();
+        }
 
         ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
         add(background);
@@ -82,7 +81,7 @@ public class GraphicManager {
         };
 
         playerLife = new Text();
-        playerLife.setX(screenWidth /2);
+        playerLife.setX(getScreenWidth() /2);
         playerLife.setY(30);
         playerLife.setFill(Color.RED);
 
@@ -103,19 +102,11 @@ public class GraphicManager {
     }
 
     public double getScreenWidth() {
-        return screenWidth;
-    }
-
-    public void setScreenWidth(double width) {
-        this.screenWidth = width;
+        return getStage().getWidth();
     }
 
     public double getScreenHeight() {
-        return screenHeight;
-    }
-
-    public void getScreenHeight(double height) {
-        this.screenHeight = height;
+        return getStage().getHeight();
     }
 
     public void updatePlayerScore(Integer score){
@@ -207,7 +198,23 @@ public class GraphicManager {
         }
     }
 
+    public Point getRandomSpawnpoint() {
+        Point point = new Point();
+        double x = getScreenWidth();
+        double y = Math.random() * getScreenHeight() * 0.8;
+        point.setLocation(x, y);
+        return point;
+    }
+
     public void update(){
+        if (Math.random() < 0.05) {
+            double rand = Math.random();
+            Sprite star = new Sprite(rand * 0.4, rand * 10, SpriteType.STAR);
+            star.setMovingXcoefficient(-1);
+            star.setPosition(getRandomSpawnpoint());
+            add(star);
+        }
+
         pane.getChildren().forEach(node -> {
             if(node instanceof Sprite){
                 Sprite sprite = (Sprite) node;
@@ -239,7 +246,7 @@ public class GraphicManager {
                 bullets.remove(n);
             }
             pane.getChildren().remove(n);
-
+            n = null;
         });
         for (Node node : toAdd) {
             if(!pane.getChildren().contains(node)){
@@ -268,5 +275,28 @@ public class GraphicManager {
         imageView.setFitWidth(imageView.getImage().getWidth());
         imageView.setFitHeight(imageView.getImage().getHeight());
         return imageView;
+    }
+
+    public Label showEndOfGameScreen() {
+        Label message = new Label("REPLAY");
+        message.setTextFill(Color.WHITE);
+        message.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 50));
+        message.setMinWidth(getScreenWidth());
+        message.setMaxWidth(getScreenWidth());
+        message.setAlignment(Pos.CENTER);
+        message.setTranslateY(getScreenHeight()/2);
+
+        message.setOnMouseEntered(event -> {
+            message.setTextFill(Color.GOLD);
+        });
+
+        message.setOnMouseExited(event -> {
+            message.setTextFill(Color.WHITE);
+        });
+
+        getStage().getScene().setCursor(Cursor.DEFAULT);
+
+        add(message);
+        return message;
     }
 }

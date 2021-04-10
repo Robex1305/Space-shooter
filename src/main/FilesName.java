@@ -1,9 +1,9 @@
 package main;
 
 public class FilesName {
-    private static String imagesFolder = "./main/resources/images/";
-    private static String soundsFolder = "./main/resources/sounds/";
-    private static String fontsFolder = "./main/resources/fonts/";
+    private static String imagesFolder = "main/resources/images/";
+    private static String soundsFolder = "main/resources/sounds/";
+    private static String fontsFolder = "main/resources/fonts/";
 
     public static String DEFAULT = imagesFolder + "default.png";
     public static String BACKGROUND = imagesFolder + "background.jpg";
@@ -22,6 +22,7 @@ public class FilesName {
     public static String STAR = imagesFolder + "star.png";
     public static String EXPLOSION_GIF = imagesFolder + "explosion.gif";
 
+    public static String UPGRADE = soundsFolder + "upgrade.mp3";
     public static String SHOOT1 = soundsFolder + "shoot1.mp3";
     public static String SHOOT2 = soundsFolder + "shoot2.mp3";
     public static String SHOOT3 = soundsFolder + "shoot3.mp3";

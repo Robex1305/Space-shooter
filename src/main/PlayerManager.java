@@ -53,26 +53,39 @@ public class PlayerManager {
     }
 
     public void addPlayerScore(Integer scoreToAdd){
+        int unlockedBonusesTmp = unlockedBonuses;
         this.setPlayerScore(playerScore + scoreToAdd);
-        if(unlockedBonuses == 0 && getPlayerScore() >= 2500){
-            this.player.setWeapon(new Weapon(6,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
+        if(unlockedBonuses == 0 && getPlayerScore() >= 1000){
+            this.player.setWeapon(new Weapon(4,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
             unlockedBonuses++;
         }
-        else if(unlockedBonuses == 1 && getPlayerScore() >= 5000){
-            this.player.setWeapon(new Weapon(2,3, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+        else if(unlockedBonuses == 1 && getPlayerScore() >= 7500){
+            this.player.setWeapon(new Weapon(1.5,4, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
             unlockedBonuses++;
         }
         else if(unlockedBonuses == 2 && getPlayerScore() >= 15000){
-            this.player.setWeapon(new Weapon(4,3, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+            this.player.setWeapon(new Weapon(3,5, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
             unlockedBonuses++;
         }
         else if(unlockedBonuses == 3 && getPlayerScore() >= 30000){
-            this.player.setWeapon(new Weapon(7,2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+            this.player.setWeapon(new Weapon(7,3, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
             unlockedBonuses++;
         }
-        else if(unlockedBonuses == 4 && getPlayerScore() >= 50000){
-            this.player.setWeapon(new Weapon(10,2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        else if(unlockedBonuses == 4 && getPlayerScore() >= 45000){
+            this.player.setWeapon(new Weapon(10,3, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
             unlockedBonuses++;
+        }
+        else if(unlockedBonuses == 5 && getPlayerScore() >= 70000){
+            this.player.setWeapon(new Weapon(10,5, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+            unlockedBonuses++;
+        }
+        else if(unlockedBonuses == 6 && getPlayerScore() >= 1000000){
+            this.player.setWeapon(new Weapon(15,5, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+            unlockedBonuses++;
+        }
+
+        if(unlockedBonusesTmp != unlockedBonuses) {
+            ResourcesManager.getInstance().playSound(FilesName.UPGRADE, 5);
         }
     }
 

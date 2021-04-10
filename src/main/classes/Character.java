@@ -27,7 +27,7 @@ public class Character extends Sprite {
 
         if(SpriteType.PLAYER.equals(spriteType)){
             characterType = CharacterType.PLAYER;
-            this.weapon = new Weapon(3,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
+            this.weapon = new Weapon(2.5,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
         } else {
             this.movingXcoefficient = -1;
             characterType = CharacterType.ENEMY;
@@ -83,7 +83,11 @@ public class Character extends Sprite {
 
                         break;
                 }
-                bullet.setMovingXcoefficient(-1);
+
+                //Nullpointer on bullet... HOW? THE? FUCK?
+                if(bullet != null) {
+                    bullet.setMovingXcoefficient(-1);
+                }
             }
 
             boolean doShoot = true;
@@ -93,7 +97,7 @@ public class Character extends Sprite {
                 }
             }
 
-            if(doShoot) {
+            if(doShoot && bullet != null) {
                 spritesToAdd.add(bullet);
                 this.weapon.setOnCooldown();
             }

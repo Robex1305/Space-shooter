@@ -15,26 +15,26 @@ public class Enemy extends Character{
         folowTarget = false;
 
         if(level == 1) {
-            setWeapon(new Weapon(0.3, 1));
+            setWeapon(new Weapon(0.15, 1));
             setSpriteType(SpriteType.ENEMY1);
-            setLife(6);
-            setSpeed(2);
+            setLife(4);
+            setSpeed(1.7);
         } else if(level == 2) {
-            setWeapon(new Weapon(0.6, 1));
+            setWeapon(new Weapon(0.4, 1));
             setSpriteType(SpriteType.ENEMY2);
-            setLife(5);
-            setSpeed(3.5);
+            setLife(6);
+            setSpeed(2.5);
             folowTarget = true;
         } else if(level == 3) {
             setWeapon(new Weapon(0.24, 2));
             setSpriteType(SpriteType.ENEMY3);
             setLife(15);
-            setSpeed(2);
+            setSpeed(1);
         } else if(level == 4) {
             setWeapon(new Weapon(0.18, 3));
             setSpriteType(SpriteType.ENEMY4);
-            setLife(20);
-            setSpeed(3);
+            setLife(30);
+            setSpeed(2);
         }
     }
 
@@ -67,7 +67,7 @@ public class Enemy extends Character{
     @Override
     protected void update() {
         super.update();
-        if(target != null && target.isAlive()) {
+        if(folowTarget && target.isAlive()) {
             if (getY() < target.getY()) {
                 setMovingYcoefficient(0.3);
             } else if (getY() > target.getY()) {

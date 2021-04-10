@@ -8,13 +8,18 @@ import main.classes.SpriteType;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResourcesManager {
 
     private MediaPlayer mediaPlayer;
     private MediaPlayer backgroundPlayer;
     private Media media;
+    private List<Media> playing;
 
     private static ResourcesManager instance;
 
@@ -26,30 +31,12 @@ public class ResourcesManager {
         return instance;
     }
 
-    private ResourcesManager(){}
-
-    public InputStream getFileStream(String fileName){
-        InputStream is;
-
-        try {
-            is = new FileInputStream(getFile(fileName));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("An error occured while retrieving the stream", e);
-        }
-
-        return is;
+    private ResourcesManager(){
+        playing = new ArrayList<>();
     }
 
-    public File getFile(String fileName){
-        try {
-            URL url = this.getClass().getClassLoader().getResource(fileName);
-            if (url == null) {
-                throw new FileNotFoundException("Can't find: " + fileName);
-            }
-            return new File(url.toURI());
-        }catch (Exception e) {
-            throw new RuntimeException("An error occured while loading the resource", e);
-        }
+    public InputStream getFileStream(String fileName){
+       return getClass().getClassLoader().getResourceAsStream(fileName);
     }
 
     public Image getAssociatedImage(SpriteType spriteType, double scale) {
@@ -74,20 +61,39 @@ public class ResourcesManager {
 
 
     public void playSound(String fileName, double volumePercentage){
-        media = new Media(getFile(fileName).toURI().toString());
+        try {
+            media = new Media(getClass().getClassLoader().getResource(fileName).toURI().toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setVolume(volumePercentage/100);
         mediaPlayer.play();
     }
 
-    public void startSoundtrack(double volumePercentage, boolean loopPart){
-        if(!loopPart) {
-            media = new Media(getFile(FilesName.SOUNDTRACK).toURI().toString());
-        }else{
-            media = new Media(getFile(FilesName.SOUNDTRACK_LOOP).toURI().toString());
+    public void reset(){
+        mediaPlayer.stop();
+        backgroundPlayer.stop();
+
+        mediaPlayer.dispose();
+        backgroundPlayer.dispose();
+        instance = null;
+    }
+
+    public void startSoundtrack(double volumePercentage, boolean loopPart) {
+        try {
+            if (!loopPart) {
+
+                media = new Media(getClass().getClassLoader().getResource(FilesName.SOUNDTRACK).toURI().toString());
+
+            } else {
+                media = new Media(getClass().getClassLoader().getResource(FilesName.SOUNDTRACK_LOOP).toURI().toString());
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
         backgroundPlayer = new MediaPlayer(media);
-        backgroundPlayer.setVolume(volumePercentage/100);
+        backgroundPlayer.setVolume(volumePercentage / 100);
         backgroundPlayer.play();
         backgroundPlayer.setOnEndOfMedia(new Runnable() {
             @Override
