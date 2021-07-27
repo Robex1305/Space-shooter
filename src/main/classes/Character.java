@@ -109,14 +109,19 @@ public class Character extends Sprite {
     }
 
     public boolean checkColides(Character character) {
-        if (character.getCharacterType() != getCharacterType()) {
-            boolean colides = super.colide(character);
-            if (colides) {
-                character.takeDamages(life);
-                takeDamages(life);
+        if(character != null) {
+            if (character.getCharacterType() != getCharacterType()) {
+                boolean colides = super.colide(character);
+                if (colides) {
+                    character.takeDamages(life);
+                    takeDamages(life);
+                }
+                return colides;
+            } else {
+                return false;
             }
-            return colides;
-        } else {
+        }
+        else{
             return false;
         }
     }

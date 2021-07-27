@@ -116,15 +116,16 @@ public class GraphicManager {
     }
 
     public void updatePlayerLife(){
-        if(player.getLife() > 0) {
-            StringBuilder lifeBar = new StringBuilder();
-            for (int i = 0; i < player.getLife(); i++) {
-                lifeBar.append("♥");
+        if (player != null) {
+            if (player.getLife() > 0) {
+                StringBuilder lifeBar = new StringBuilder();
+                for (int i = 0; i < player.getLife(); i++) {
+                    lifeBar.append("♥");
+                }
+                playerLife.setText(lifeBar.toString());
+            } else {
+                playerLife.setText("GAME OVER");
             }
-            playerLife.setText(lifeBar.toString());
-        }
-        else{
-            playerLife.setText("GAME OVER");
         }
     }
 
