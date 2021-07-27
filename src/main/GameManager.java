@@ -45,6 +45,7 @@ public class GameManager {
             public void run() {
                 update();
                 time += GraphicManager.FRAME_TIME;
+                graphicManager.setTime(time);
             }
         },0,Math.round(GraphicManager.FRAME_TIME*1000));
     }

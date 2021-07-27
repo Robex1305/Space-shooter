@@ -9,12 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import main.classes.*;
 import main.classes.Character;
@@ -29,7 +26,7 @@ public class GraphicManager {
 
     private Stage stage;
     private Pane pane;
-
+    private double time;
     private AnimationTimer animationTimer;
 
     private List<Node> toAdd;
@@ -41,6 +38,8 @@ public class GraphicManager {
 
     private Text playerLife;
     private Text playerScore;
+    private ImageView background1;
+    private ImageView background2;
 
     private Character player;
 
@@ -69,9 +68,13 @@ public class GraphicManager {
             this.stage.show();
         }
 
-        ImageView background = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
-        add(background);
-        background.toBack();
+        background1 = getImage(FilesName.BACKGROUND, 0, 0, pane.getWidth(), pane.getHeight());
+        add(background1);
+        background1.toBack();
+
+        background2 = getImage(FilesName.BACKGROUND, pane.getWidth(), 0, pane.getWidth(), pane.getHeight());
+        add(background2);
+        background2.toBack();
 
         scene.setCursor(Cursor.NONE);
 
@@ -96,6 +99,10 @@ public class GraphicManager {
         this.playerLife.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
         add(playerScore);
         add(playerLife);
+    }
+
+    public void setTime(double time) {
+        this.time = time;
     }
 
     public void setPlayer(Character player) {
@@ -228,14 +235,14 @@ public class GraphicManager {
     }
 
     public void update(){
-//        if (Math.random() < 0.05) {
-//            double rand = Math.random();
-//            Sprite star = new Sprite(rand * 0.2, rand * 10, SpriteType.STAR);
-//            star.getSkin().setOpacity(0.5);
-//            star.setMovingXcoefficient(-1);
-//            star.setPosition(getRandomSpawnpoint());
-//            add(star);
-//        }
+        background1.setX(background1.getX() - 2);
+        if(background1.getX() <= (-pane.getWidth())){
+            background1.setX(pane.getWidth());
+        }
+        background2.setX(background2.getX() - 2);
+        if(background2.getX() <= (-pane.getWidth())){
+            background2.setX(pane.getWidth());
+        }
 
         pane.getChildren().forEach(node -> {
             if(node instanceof Sprite){
@@ -306,6 +313,8 @@ public class GraphicManager {
         imageView.setImage(image);
         imageView.setFitWidth(imageView.getImage().getWidth());
         imageView.setFitHeight(imageView.getImage().getHeight());
+        imageView.setX(x);
+        imageView.setY(y);
         return imageView;
     }
 
