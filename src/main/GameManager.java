@@ -58,7 +58,7 @@ public class GameManager {
         if(playerManager.getPlayer() != null) {
             this.graphicManager.updatePlayerLife();
             if (playerManager.getPlayer().isAlive()) {
-                if (hasTimePassed(2500 - time > 100 ? 2500 - time : 100)) {
+                if (hasTimePassed(2250 - time > 100 ? 2250 - time : 100)) {
                     double difficulty = 1 + Math.random() * (time / 90);
                     Character enemy = null;
                     if (difficulty < 4) {
@@ -163,7 +163,7 @@ public class GameManager {
             @Override
             public void handle(ActionEvent event) {
                 playerManager.enableMouseControl(true);
-                playerManager.enableKeyboardControl(true);
+                playerManager.enableKeyboardControl(false);
                 graphicManager.remove(veil);
                 new Thread() {
                     @Override

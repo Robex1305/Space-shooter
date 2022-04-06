@@ -61,7 +61,7 @@ public class GraphicManager {
         pane = new Pane();
         pane.setPrefSize(stage.getWidth(),stage.getHeight());
         Scene scene = new Scene(pane);
-        this.stage.setTitle("Galaxy Fighter");
+        this.stage.setTitle("Space Shooter - v1.0");
         this.stage.setScene(scene);
         this.stage.setResizable(false);
         if(!this.stage.isShowing()) {
@@ -119,7 +119,7 @@ public class GraphicManager {
     }
 
     public void updatePlayerScore(Integer score){
-        this.playerScore.setText("Score: " + score);
+        this.playerScore.setText("SCORE: " + score);
     }
 
     public void updatePlayerLife(){
