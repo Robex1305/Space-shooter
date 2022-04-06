@@ -226,6 +226,7 @@ public class GraphicManager {
         return healths;
     }
 
+    //Unused
     public Point getRandomSpawnpoint() {
         Point point = new Point();
         double x = getScreenWidth();
@@ -235,6 +236,9 @@ public class GraphicManager {
     }
 
     public void update(){
+        //Make the background scrolls
+        //It has 2 backgrounds. If one reaches the left edge, it is moved to the right, while the second keeps scrolling
+        //to the left, until it reaches the edge, and so on.
         background1.setX(background1.getX() - 2);
         if(background1.getX() <= (-pane.getWidth())){
             background1.setX(pane.getWidth());
@@ -250,6 +254,7 @@ public class GraphicManager {
 
                 if(sprite instanceof Character){
                     Character character = (Character) sprite;
+                    //Adds to the screen all sprites crated by the character. Calling "getSpritesToAdd" return the list but wipes it right after.
                     character.getSpritesToAdd().forEach(this::add);
                 }
 

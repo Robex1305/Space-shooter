@@ -58,12 +58,16 @@ public class GameManager {
         if(playerManager.getPlayer() != null) {
             this.graphicManager.updatePlayerLife();
             if (playerManager.getPlayer().isAlive()) {
+                // The delay between enemy spawning is 2250ms. As time passes, this delay is shortened (2250 - time) to increase difficulty. A
+                // When time is 100 from the delay, it cannot go lower, 100 will be the limit
+                // Ex: if you play for an hour, 2250(ms) - 3600(s) = -1350, causing problem.
+                // Also, if you play for an hour, you're an absolute madlad and I thank you for enjoying it
                 if (hasTimePassed(2250 - time > 100 ? 2250 - time : 100)) {
                     double difficulty = 1 + Math.random() * (time / 90);
                     Character enemy = null;
-                    if (difficulty < 4) {
+                    if (difficulty < 4) { //while difficulty can increase, we spawn one ennemy at time
                         enemy = npcManager.spawnEnemy((int) Math.round(difficulty));
-                    } else {
+                    } else { //when we reach end-game, we always spawn level-4 enemies + an extra
                         enemy = npcManager.spawnEnemy(4);
                         boolean additionalSpawning = Math.random() >= 0.5;
                         if (additionalSpawning) {
@@ -71,11 +75,13 @@ public class GameManager {
                             additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
                         }
                     }
+                    //Speed is randomly set + modifier depending on time spent on the game
                     enemy.setSpeed(enemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
                 }
 
                 Character player = playerManager.getPlayer();
 
+                //Manage health items
                 for (Health h : graphicManager.getHealths()) {
                     if (h.colide(player) && player.getLife() < 10) {
                         if (!h.isToDelete()) {
@@ -86,17 +92,20 @@ public class GameManager {
                     }
                 }
 
-                /** Bullets Management **/
+                // Manage bullets
                 List<Bullet> bullets = new ArrayList<Bullet>(graphicManager.getBullets());
                 List<Character> characters = new ArrayList<Character>(graphicManager.getCharacters());
 
+                //We retrieve each bullets on screen and check if they are coliding with something
                 for (Bullet b : bullets) {
                     for(Character c : characters) {
+                        //"checkColides(...)" checks colision but also applies damages
                         if (b.checkColides(c)) {
+                            //if the enemy ha sto be deleted (ex: is dead), 4% chances it drops a health item
                             if (CharacterType.ENEMY.equals(c.getCharacterType())) {
                                 Enemy e = (Enemy) c;
                                 if (c.isToDelete()) {
-                                    if (Math.random() > 0.98) {
+                                    if (Math.random() > 0.96) {
                                         dropHealth(c);
                                     }
                                     playerManager.addPlayerScore(100 * e.getLevel());

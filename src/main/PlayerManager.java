@@ -52,6 +52,7 @@ public class PlayerManager {
         this.playerScore = playerScore;
     }
 
+    //TODO: rework this to make upgrades manageable more easily
     public void addPlayerScore(Integer scoreToAdd){
         int unlockedBonusesTmp = unlockedBonuses;
         this.setPlayerScore(playerScore + scoreToAdd);
