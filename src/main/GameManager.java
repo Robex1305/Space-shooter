@@ -30,6 +30,10 @@ public class GameManager {
     }
 
     public void init() {
+        if(timer != null){
+            timer.cancel();
+            timer.purge();
+        }
         time = 0;
         gameOver = false;
         graphicManager = new GraphicManager(stage);
