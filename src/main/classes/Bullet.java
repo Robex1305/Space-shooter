@@ -5,7 +5,6 @@ import main.GraphicManager;
 public class Bullet extends TemporarySprite {
     private Character source;
 
-
     public Bullet(Character source, double scale, SpriteType spriteType) {
         super(source.getPosition(), scale, 6, spriteType, 5);
         this.source = source;

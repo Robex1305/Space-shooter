@@ -19,10 +19,16 @@ public class GameManager {
     protected GraphicManager graphicManager;
     protected PlayerManager playerManager;
     protected NpcManager npcManager;
+
     protected AnimationTimer animationTimer;
     protected Timer timer;
     private boolean gameOver;
     protected double time;
+
+    private Character player;
+
+    public static int speedMultiplier = 0;
+    public static final int timeUntilEndgameInSeconds = 1800;
 
     public GameManager(Stage primaryStage) {
         this.stage = primaryStage;
@@ -55,66 +61,17 @@ public class GameManager {
     }
 
     public void update() {
-        if(playerManager.getPlayer() != null) {
+        player = playerManager.getPlayer();
+        if (speedMultiplier < 5){
+            speedMultiplier = (int) Math.round(time / timeUntilEndgameInSeconds * 5);
+            System.out.println(speedMultiplier);
+        }
+        if(player != null) {
             this.graphicManager.updatePlayerLife();
             if (playerManager.getPlayer().isAlive()) {
-                // The delay between enemy spawning is 2250ms. As time passes, this delay is shortened (2250 - time) to increase difficulty. A
-                // When time is 100 from the delay, it cannot go lower, 100 will be the limit
-                // Ex: if you play for an hour, 2250(ms) - 3600(s) = -1350, causing problem.
-                // Also, if you play for an hour, you're an absolute madlad and I thank you for enjoying it
-                if (hasTimePassed(2250 - time > 100 ? 2250 - time : 100)) {
-                    double difficulty = 1 + Math.random() * (time / 90);
-                    Character enemy = null;
-                    if (difficulty < 4) { //while difficulty can increase, we spawn one ennemy at time
-                        enemy = npcManager.spawnEnemy((int) Math.round(difficulty));
-                    } else { //when we reach end-game, we always spawn level-4 enemies + an extra
-                        enemy = npcManager.spawnEnemy(4);
-                        boolean additionalSpawning = Math.random() >= 0.5;
-                        if (additionalSpawning) {
-                            Character additionalEnemy = npcManager.spawnEnemy((int) (1 + Math.random() * 3));
-                            additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
-                        }
-                    }
-                    //Speed is randomly set + modifier depending on time spent on the game
-                    enemy.setSpeed(enemy.getSpeed() + Math.random() * (time / 300 < 2 ? time / 300 : 2));
-                }
-
-                Character player = playerManager.getPlayer();
-
-                //Manage health items
-                for (Health h : graphicManager.getHealths()) {
-                    if (h.colide(player) && player.getLife() < 10) {
-                        if (!h.isToDelete()) {
-                            player.setLife(player.getLife() + 1);
-                            ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
-                            h.setToDelete(true);
-                        }
-                    }
-                }
-
-                // Manage bullets
-                List<Bullet> bullets = new ArrayList<Bullet>(graphicManager.getBullets());
-                List<Character> characters = new ArrayList<Character>(graphicManager.getCharacters());
-
-                //We retrieve each bullets on screen and check if they are coliding with something
-                for (Bullet b : bullets) {
-                    for(Character c : characters) {
-                        //"checkColides(...)" checks colision but also applies damages
-                        if (b.checkColides(c)) {
-                            //if the enemy ha sto be deleted (ex: is dead), 4% chances it drops a health item
-                            if (CharacterType.ENEMY.equals(c.getCharacterType())) {
-                                Enemy e = (Enemy) c;
-                                if (c.isToDelete()) {
-                                    if (Math.random() > 0.96) {
-                                        dropHealth(c);
-                                    }
-                                    playerManager.addPlayerScore(100 * e.getLevel());
-                                    graphicManager.updatePlayerScore(playerManager.getPlayerScore());
-                                }
-                            }
-                        }
-                    }
-                }
+                spawnEnemies();
+                checkSpawnableItems();
+                manageHit();
             } else {
                 if (!gameOver) {
                     gameOver = true;
@@ -124,6 +81,75 @@ public class GameManager {
                     });
                 }
             }
+        }
+    }
+
+    private void manageHit() {
+        // Manage bullets
+        List<Bullet> bullets = new ArrayList<Bullet>(graphicManager.getBullets());
+        List<Character> characters = new ArrayList<Character>(graphicManager.getCharacters());
+
+        //We retrieve each bullets on screen and check if they are coliding with something
+        for (Bullet b : bullets) {
+            for(Character c : characters) {
+                //"checkColides(...)" checks colision but also applies damages
+                if (b.checkColides(c)) {
+                    //if the enemy ha sto be deleted (ex: is dead), 4% chances it drops a health item
+                    if (CharacterType.ENEMY.equals(c.getCharacterType())) {
+                        Enemy e = (Enemy) c;
+                        System.out.println("HIT");
+                        if (c.isToDelete()) {
+                            if (Math.random() > 0.96) {
+                                dropHealth(c);
+                            }
+                            playerManager.addPlayerScore(e.getLevel() < 1 ? 150 : 100 * e.getLevel());
+                            graphicManager.updatePlayerScore(playerManager.getPlayerScore());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void checkSpawnableItems() {
+        //Manage health items
+        for (Health h : graphicManager.getHealths()) {
+            if (h.colide(player) && player.getLife() < 10) {
+                if (!h.isToDelete()) {
+                    player.setLife(player.getLife() + 1);
+                    ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                    h.setToDelete(true);
+                }
+            }
+        }
+    }
+
+    private void spawnEnemies() {
+        // The delay between enemy spawning is 2250ms. As time passes, this delay is shortened (2250 - time) to increase difficulty. A
+        // When time is 100 from the delay, it cannot go lower, 100 will be the limit
+        // Ex: if you play for an hour, 2250(ms) - 3600(s) = -1350, causing problem.
+        // Also, if you play for an hour, you're an absolute madlad and I thank you for enjoying it
+        Enemy enemy = null;
+
+        boolean additionalSpawningChance = Math.random() >= 0.7;
+
+        if (hasTimePassed(2250.0 / speedMultiplier)) {
+            if(additionalSpawningChance){
+                npcManager.spawnEnemy(0);
+            }
+            double difficulty = 1 + Math.random() * (time / 90);
+            if (difficulty < 4) { //while difficulty can increase, we spawn one ennemy at time
+                enemy = npcManager.spawnEnemy((int) Math.round(difficulty));
+
+            } else { //when we reach end-game, we always spawn level-4 enemies + an extra
+                enemy = npcManager.spawnEnemy(4);
+                if (additionalSpawningChance) {
+                    Character additionalEnemy = npcManager.spawnEnemy((int) (Math.random() * speedMultiplier));
+                    additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * speedMultiplier);
+                }
+            }
+            //Speed is randomly set + modifier depending on time spent on the game
+            enemy.setSpeed(enemy.getSpeed() + Math.random() * speedMultiplier);
         }
     }
 

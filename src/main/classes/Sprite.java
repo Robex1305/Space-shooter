@@ -5,7 +5,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import main.GraphicManager;
+import javafx.scene.transform.Rotate;
 import main.ResourcesManager;
 
 import java.awt.*;
@@ -15,7 +15,9 @@ public class Sprite extends Rectangle {
     protected SpriteType spriteType;
     protected double speed;
     protected double scale;
+    protected double rotationSpeed;
 
+    protected Rotate rotate;
     protected double movingXcoefficient;
     protected double movingYcoefficient;
     protected boolean isToDelete;
@@ -40,7 +42,7 @@ public class Sprite extends Rectangle {
         this.skin = new ImageView();
         loadSkin();
 
-        //debug hitbox
+        //DEBUG: hitbox
         this.setOpacity(0);
         this.setFill(Color.RED);
 
@@ -84,6 +86,13 @@ public class Sprite extends Rectangle {
         setX(getX() + movingXcoefficient * speed);
         setY(getY() + movingYcoefficient * speed);
         updateImagePosition();
+        if(this.rotationSpeed != 0) {
+            this.getSkin().setRotate(this.skin.getRotate() + this.rotationSpeed);
+        }
+    }
+
+    public void applyRotation(double delta) {
+        this.rotationSpeed = delta;
     }
 
     public void setPosition(double x, double y) {
@@ -113,6 +122,16 @@ public class Sprite extends Rectangle {
     public void setSpriteType(SpriteType spriteType) {
         this.spriteType = spriteType;
         loadSkin();
+    }
+
+    public void adjustHitboxSize(double ratioX, double ratioY){
+        this.setScaleX(ratioX);
+        this.setScaleY(ratioY);
+    }
+
+    public void adjustImageSize(double ratioX, double ratioY){
+        this.getSkin().setScaleX(ratioX);
+        this.getSkin().setScaleY(ratioY);
     }
 
     public void loadSkin() {

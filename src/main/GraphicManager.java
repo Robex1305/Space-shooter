@@ -19,6 +19,8 @@ import main.classes.Character;
 import java.awt.*;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class GraphicManager {
@@ -46,11 +48,11 @@ public class GraphicManager {
     final public static double FRAME_TIME = 0.0167;
 
     public GraphicManager(Stage stage){
-        toAdd = new ArrayList<>();
-        toRemove = new ArrayList<>();
-        characters = new ArrayList<>();
-        bullets = new ArrayList<>();
-        healths = new ArrayList<>();
+        toAdd = Collections.synchronizedList(new ArrayList<>());
+        toRemove = Collections.synchronizedList(new ArrayList<>());
+        characters = Collections.synchronizedList(new ArrayList<>());
+        bullets = Collections.synchronizedList(new ArrayList<>());
+        healths = Collections.synchronizedList(new ArrayList<>());
 
         this.stage = stage;
         this.stage.setWidth(1280);
@@ -239,13 +241,15 @@ public class GraphicManager {
         //Make the background scrolls
         //It has 2 backgrounds. If one reaches the left edge, it is moved to the right, while the second keeps scrolling
         //to the left, until it reaches the edge, and so on.
-        background1.setX(background1.getX() - 2);
+        System.out.println(time);
+        background1.setX(background1.getX() - (1 + GameManager.speedMultiplier));
+        background2.setX(background2.getX() - (1 + GameManager.speedMultiplier));
+
         if(background1.getX() <= (-pane.getWidth())){
-            background1.setX(pane.getWidth());
+            background1.setX(pane.getWidth() - (1 + GameManager.speedMultiplier));
         }
-        background2.setX(background2.getX() - 2);
         if(background2.getX() <= (-pane.getWidth())){
-            background2.setX(pane.getWidth());
+            background2.setX(pane.getWidth() - (1 + GameManager.speedMultiplier));
         }
 
         pane.getChildren().forEach(node -> {
@@ -265,7 +269,7 @@ public class GraphicManager {
             }
         });
 
-        toRemove.forEach(n -> {
+        toRemove.iterator().forEachRemaining(n -> {
             if(n instanceof Sprite){
                 ((Sprite) n).stopTimer();
             }
@@ -292,11 +296,11 @@ public class GraphicManager {
             pane.getChildren().remove(n);
 
         });
-        for (Node node : toAdd) {
+        toAdd.iterator().forEachRemaining(node -> {
             if(!pane.getChildren().contains(node)){
                 pane.getChildren().add(node);
             }
-        }
+        });
 
         toRemove.clear();
         toAdd.clear();

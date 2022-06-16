@@ -1,33 +1,39 @@
 package main.classes;
 
-import main.GameManager;
-
-import java.awt.*;
-
 public class Enemy extends Character{
     private Character target;
     private Integer level;
     private boolean folowTarget;
 
     public Enemy(Integer level){
-        super(0,SpriteType.DEFAULT);
+        super(0, getSpriteType(level));
         this.level = level;
         folowTarget = false;
+        isShooting = false;
 
-        if(level == 1) {
+        if(level != 0){
+            isShooting = true;
+        }
+        if(level == 0){
+            setWeapon(new Weapon(0, 0));
+            setLife(10);
+            setSpeed(1.0);
+            adjustHitboxSize(0.3, 0.3);
+            adjustImageSize(0.5,0.5);
+            applyRotation(-getSpeed());
+        }
+        else if(level == 1) {
             setWeapon(new Weapon(0.15, 1));
-            setSpriteType(SpriteType.ENEMY1);
             setLife(4);
             setSpeed(1.7);
+            applyRotation(-getSpeed());
         } else if(level == 2) {
             setWeapon(new Weapon(0.4, 1));
-            setSpriteType(SpriteType.ENEMY2);
             setLife(6);
-            setSpeed(2.5);
+            setSpeed(2);
             folowTarget = true;
         } else if(level == 3) {
             setWeapon(new Weapon(0.24, 2));
-            setSpriteType(SpriteType.ENEMY3);
             setLife(15);
             setSpeed(1);
         } else if(level == 4) {
@@ -35,6 +41,23 @@ public class Enemy extends Character{
             setSpriteType(SpriteType.ENEMY4);
             setLife(30);
             setSpeed(2);
+        }
+    }
+
+    public static SpriteType getSpriteType(int enemyLevel){
+        switch (enemyLevel) {
+            case 0:
+                return SpriteType.ASTEROID;
+            case 1:
+                return SpriteType.ENEMY1;
+            case 2:
+                return SpriteType.ENEMY2;
+            case 3:
+                return SpriteType.ENEMY3;
+            case 4:
+                return SpriteType.ENEMY4;
+            default:
+                return SpriteType.DEFAULT_ENEMY;
         }
     }
 

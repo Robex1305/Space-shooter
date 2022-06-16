@@ -13,13 +13,10 @@ public class NpcManager {
         this.currentPlayer = currentPlayer;
     }
 
-    public Character spawnEnemy(int level){
+    public Enemy spawnEnemy(int level){
         Enemy enemy = new Enemy(level);
-
-        assert enemy != null;
         enemy.setTarget(currentPlayer);
-        enemy.setPosition(graphicManager.getScreenWidth(), 50 + Math.random() * (graphicManager.getScreenHeight()-100));
-        enemy.setIsShooting(true);
+        enemy.setPosition(graphicManager.getScreenWidth(),  Math.random() * (graphicManager.getScreenHeight()-100) - 100);
         graphicManager.add(enemy);
         return enemy;
     }

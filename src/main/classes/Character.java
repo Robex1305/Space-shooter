@@ -25,13 +25,21 @@ public class Character extends Sprite {
         spritesToAdd = new ArrayList<>();
         this.life = 10;
 
-        if(SpriteType.PLAYER.equals(spriteType)){
-            characterType = CharacterType.PLAYER;
-            this.weapon = new Weapon(2.5,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
-        } else {
-            this.movingXcoefficient = -1;
-            characterType = CharacterType.ENEMY;
-            this.weapon = new Weapon(1,1);
+        characterType = spriteType.getCharacterType();
+        switch (characterType) {
+            case PLAYER:
+                this.weapon = new Weapon(2.5,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
+                break;
+            case ENEMY:
+                this.movingXcoefficient = -1;
+                this.weapon = new Weapon(1,1);
+                break;
+            case MISC:
+                this.movingXcoefficient = -1;
+                this.weapon = new Weapon(0,0);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sprite type");
         }
     }
 
@@ -57,6 +65,9 @@ public class Character extends Sprite {
 
     //TODO Rework this shit
     public void shoot(){
+        if(!isShooting){
+            return;
+        }
         if(this.weapon.canShoot()) {
             Bullet bullet = null;
 
@@ -80,24 +91,26 @@ public class Character extends Sprite {
                         break;
                     case ENEMY4:
                         bullet = new Bullet(this, 4, SpriteType.ENEMY4_BULLET);
-
+                        break;
+                    default:
+                        bullet = new Bullet(this, 4, SpriteType.DEFAULT);
                         break;
                 }
 
-                //Nullpointer on bullet... HOW? THE? FUCK?
-                if(bullet != null) {
-                    bullet.setMovingXcoefficient(-1);
-                }
+                bullet.setMovingXcoefficient(-1);
+
             }
 
-            boolean doShoot = true;
             if(this instanceof Enemy){
+                if(((Enemy) this).getTarget() == null){
+                    throw new RuntimeException("Target is null for enemy of type " + this.characterType + "/" + this.spriteType);
+                };
                 if(!((Enemy) this).getTarget().isAlive()){
-                    doShoot = false;
+                    isShooting = false;
                 }
             }
 
-            if(doShoot && bullet != null) {
+            if(isShooting) {
                 spritesToAdd.add(bullet);
                 this.weapon.setOnCooldown();
             }

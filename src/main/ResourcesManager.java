@@ -52,7 +52,7 @@ public class ResourcesManager {
             image = new Image(imageStream, width, height, false, true);
             imageStreamForAnalizys.close();
             imageStream.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error occured while loading resource", e);
         }
 
