@@ -3,6 +3,8 @@ package main;
 import main.classes.*;
 import main.classes.Character;
 
+import java.awt.*;
+
 public class NpcManager {
 
     private Character currentPlayer;
@@ -16,7 +18,8 @@ public class NpcManager {
     public Enemy spawnEnemy(int level){
         Enemy enemy = new Enemy(level);
         enemy.setTarget(currentPlayer);
-        enemy.setPosition(graphicManager.getScreenWidth(),  Math.random() * (graphicManager.getScreenHeight()-100) - 100);
+        Point p = graphicManager.getRandomSpawnpointOffscreenRight();
+        enemy.setPosition(p.getX(),  p.getY());
         graphicManager.add(enemy);
         return enemy;
     }

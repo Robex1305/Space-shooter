@@ -27,8 +27,8 @@ public class GameManager {
 
     private Character player;
 
-    public static int speedMultiplier = 0;
-    public static final int timeUntilEndgameInSeconds = 1800;
+    public static double globalMultiplier = 1.0;
+    public static final double timeUntilEndgameInSeconds = 900.0;
 
     public GameManager(Stage primaryStage) {
         this.stage = primaryStage;
@@ -40,7 +40,7 @@ public class GameManager {
             timer.cancel();
             timer.purge();
         }
-        time = 0;
+        time = 0.0;
         gameOver = false;
         graphicManager = new GraphicManager(stage);
         playerManager = new PlayerManager(graphicManager);
@@ -48,7 +48,7 @@ public class GameManager {
     }
 
     public void initTimer(){
-        time = 0;
+        time = 0.0;
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -62,9 +62,8 @@ public class GameManager {
 
     public void update() {
         player = playerManager.getPlayer();
-        if (speedMultiplier < 5){
-            speedMultiplier = (int) Math.round(time / timeUntilEndgameInSeconds * 5);
-            System.out.println(speedMultiplier);
+        if (globalMultiplier < 5){
+            globalMultiplier = 1.0 + (time / timeUntilEndgameInSeconds * 4.0);
         }
         if(player != null) {
             this.graphicManager.updatePlayerLife();
@@ -97,12 +96,11 @@ public class GameManager {
                     //if the enemy ha sto be deleted (ex: is dead), 4% chances it drops a health item
                     if (CharacterType.ENEMY.equals(c.getCharacterType())) {
                         Enemy e = (Enemy) c;
-                        System.out.println("HIT");
                         if (c.isToDelete()) {
                             if (Math.random() > 0.96) {
                                 dropHealth(c);
                             }
-                            playerManager.addPlayerScore(e.getLevel() < 1 ? 150 : 100 * e.getLevel());
+                            playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier/2.0)));
                             graphicManager.updatePlayerScore(playerManager.getPlayerScore());
                         }
                     }
@@ -131,25 +129,24 @@ public class GameManager {
         // Also, if you play for an hour, you're an absolute madlad and I thank you for enjoying it
         Enemy enemy = null;
 
-        boolean additionalSpawningChance = Math.random() >= 0.7;
-
-        if (hasTimePassed(2250.0 / speedMultiplier)) {
+        if (hasTimePassed(3000.0 / (globalMultiplier/2))) {
+            boolean additionalSpawningChance = Math.random() >= globalMultiplier/10;
             if(additionalSpawningChance){
                 npcManager.spawnEnemy(0);
             }
-            double difficulty = 1 + Math.random() * (time / 90);
+            double difficulty = 1 + Math.random() * (time / 120);
             if (difficulty < 4) { //while difficulty can increase, we spawn one ennemy at time
                 enemy = npcManager.spawnEnemy((int) Math.round(difficulty));
 
             } else { //when we reach end-game, we always spawn level-4 enemies + an extra
                 enemy = npcManager.spawnEnemy(4);
                 if (additionalSpawningChance) {
-                    Character additionalEnemy = npcManager.spawnEnemy((int) (Math.random() * speedMultiplier));
-                    additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * speedMultiplier);
+                    Character additionalEnemy = npcManager.spawnEnemy((int) (Math.random() * globalMultiplier));
+                    additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * globalMultiplier);
                 }
             }
             //Speed is randomly set + modifier depending on time spent on the game
-            enemy.setSpeed(enemy.getSpeed() + Math.random() * speedMultiplier);
+            enemy.setSpeed(enemy.getSpeed() + Math.random() * globalMultiplier);
         }
     }
 

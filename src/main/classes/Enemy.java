@@ -16,10 +16,11 @@ public class Enemy extends Character{
         }
         if(level == 0){
             setWeapon(new Weapon(0, 0));
-            setLife(10);
-            setSpeed(1.0);
-            adjustHitboxSize(0.3, 0.3);
-            adjustImageSize(0.5,0.5);
+            double delta = 0.2 + Math.random(); //allows to have small/fast asteroids or big/slow ones (min: 0.2)
+            setLife((int) (10.0*delta));
+            setSpeed(1.5/delta);
+            adjustHitboxSize(0.3*delta, 0.3*delta);
+            adjustImageSize(0.5*delta,0.5*delta);
             applyRotation(-getSpeed());
         }
         else if(level == 1) {

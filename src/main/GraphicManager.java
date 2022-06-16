@@ -117,7 +117,7 @@ public class GraphicManager {
     }
 
     public double getScreenHeight() {
-        return getStage().getHeight();
+        return getStage().getScene().getHeight();
     }
 
     public void updatePlayerScore(Integer score){
@@ -229,10 +229,10 @@ public class GraphicManager {
     }
 
     //Unused
-    public Point getRandomSpawnpoint() {
+    public Point getRandomSpawnpointOffscreenRight() {
         Point point = new Point();
         double x = getScreenWidth();
-        double y = Math.random() * getScreenHeight() * 0.8;
+        double y = 50 + (Math.random() * (getScreenHeight() - 200));
         point.setLocation(x, y);
         return point;
     }
@@ -241,15 +241,14 @@ public class GraphicManager {
         //Make the background scrolls
         //It has 2 backgrounds. If one reaches the left edge, it is moved to the right, while the second keeps scrolling
         //to the left, until it reaches the edge, and so on.
-        System.out.println(time);
-        background1.setX(background1.getX() - (1 + GameManager.speedMultiplier));
-        background2.setX(background2.getX() - (1 + GameManager.speedMultiplier));
+        background1.setX(background1.getX() - (1 + GameManager.globalMultiplier));
+        background2.setX(background2.getX() - (1 + GameManager.globalMultiplier));
 
         if(background1.getX() <= (-pane.getWidth())){
-            background1.setX(pane.getWidth() - (1 + GameManager.speedMultiplier));
+            background1.setX(pane.getWidth() - (1 + GameManager.globalMultiplier));
         }
         if(background2.getX() <= (-pane.getWidth())){
-            background2.setX(pane.getWidth() - (1 + GameManager.speedMultiplier));
+            background2.setX(pane.getWidth() - (1 + GameManager.globalMultiplier));
         }
 
         pane.getChildren().forEach(node -> {
@@ -269,7 +268,9 @@ public class GraphicManager {
             }
         });
 
-        toRemove.iterator().forEachRemaining(n -> {
+        Iterator<Node> toRemoveIterator = toRemove.iterator();
+        while(toRemoveIterator.hasNext()) {
+            Node n = toRemoveIterator.next();
             if(n instanceof Sprite){
                 ((Sprite) n).stopTimer();
             }
@@ -295,22 +296,27 @@ public class GraphicManager {
             }
             pane.getChildren().remove(n);
 
-        });
-        toAdd.iterator().forEachRemaining(node -> {
+        }
+
+        Iterator<Node> toAddIterator = toAdd.iterator();
+        while (toAddIterator.hasNext()){
+            Node node = toAddIterator.next();
             if(!pane.getChildren().contains(node)){
                 pane.getChildren().add(node);
             }
-        });
+        }
 
         toRemove.clear();
         toAdd.clear();
     }
 
     public void explodeAt(Sprite sprite){
-        TemporarySprite explosion = new TemporarySprite(sprite.getPosition(), 1, 0, SpriteType.EXPLOSION, 1);
+        TemporarySprite explosion = new TemporarySprite(sprite.getPosition(), 0, 0, SpriteType.EXPLOSION, 1);
         //Using twice the width on purpose to make it square, dependless of the sprite's shape
         explosion.getSkin().setFitWidth(sprite.getWidth());
         explosion.getSkin().setFitHeight(sprite.getWidth());
+        explosion.getSkin().setScaleX(sprite.getSkin().getScaleX());
+        explosion.getSkin().setScaleY(sprite.getSkin().getScaleY());
         ResourcesManager.getInstance().playSound(FilesName.EXPLOSION_MP3,8);
         add(explosion);
     }

@@ -57,19 +57,19 @@ public class PlayerManager {
         int unlockedBonusesTmp = unlockedBonuses;
         this.setPlayerScore(playerScore + scoreToAdd);
         if(unlockedBonuses == 0 && getPlayerScore() >= 2000){
-            this.player.setWeapon(new Weapon(4,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
+            this.player.setWeapon(new Weapon(5,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
             unlockedBonuses++;
         }
         else if(unlockedBonuses == 1 && getPlayerScore() >= 10000){
-            this.player.setWeapon(new Weapon(2,4, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+            this.player.setWeapon(new Weapon(3,3, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
             unlockedBonuses++;
         }
         else if(unlockedBonuses == 2 && getPlayerScore() >= 17500){
-            this.player.setWeapon(new Weapon(4,4, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+            this.player.setWeapon(new Weapon(3,5, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
             unlockedBonuses++;
         }
         else if(unlockedBonuses == 3 && getPlayerScore() >= 30000){
-            this.player.setWeapon(new Weapon(7,3, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+            this.player.setWeapon(new Weapon(10,2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
             unlockedBonuses++;
         }
         else if(unlockedBonuses == 4 && getPlayerScore() >= 60000){
