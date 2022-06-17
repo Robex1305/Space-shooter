@@ -10,6 +10,7 @@ import main.ResourcesManager;
 
 import java.awt.*;
 
+//TODO: make it extends circle for more accurate hitbox
 public class Sprite extends Rectangle {
     protected ImageView skin;
     protected SpriteType spriteType;
@@ -43,7 +44,7 @@ public class Sprite extends Rectangle {
         loadSkin();
 
         //DEBUG: hitbox
-        this.setOpacity(0.5);
+        this.setOpacity(0.0);
         this.setFill(Color.RED);
 
         timer = new AnimationTimer() {

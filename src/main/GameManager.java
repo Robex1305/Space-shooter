@@ -95,7 +95,7 @@ public class GameManager {
                     if (CharacterType.ENEMY.equals(c.getCharacterType())) {
                         Enemy e = (Enemy) c;
                         if (c.isToDelete()) {
-                            if (Math.random() > 0.5) {
+                            if (Math.random() > 0.9) {
                                 dropHealth(c);
                             }
                             playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier / 2.0)));

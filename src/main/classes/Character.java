@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Character extends Sprite {
+
+    //TODO: Add secondary weapon for player...?
     private Weapon weapon;
     protected boolean isShooting;
     private Integer life;
