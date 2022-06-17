@@ -20,7 +20,6 @@ public class GameManager {
     protected PlayerManager playerManager;
     protected NpcManager npcManager;
 
-    protected AnimationTimer animationTimer;
     protected Timer timer;
     private boolean gameOver;
     protected double time;
@@ -36,7 +35,8 @@ public class GameManager {
     }
 
     public void init() {
-        if(timer != null){
+        globalMultiplier = 1.0;
+        if (timer != null) {
             timer.cancel();
             timer.purge();
         }
@@ -47,7 +47,7 @@ public class GameManager {
         npcManager = new NpcManager(graphicManager, playerManager.getPlayer());
     }
 
-    public void initTimer(){
+    public void initTimer() {
         time = 0.0;
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -57,15 +57,15 @@ public class GameManager {
                 time += GraphicManager.FRAME_TIME;
                 graphicManager.setTime(time);
             }
-        },0,Math.round(GraphicManager.FRAME_TIME*1000));
+        }, 0, Math.round(GraphicManager.FRAME_TIME * 1000));
     }
 
     public void update() {
         player = playerManager.getPlayer();
-        if (globalMultiplier < 5){
+        if (globalMultiplier < Enemy.MAX_LEVEL) {
             globalMultiplier = 1.0 + (time / timeUntilEndgameInSeconds * 4.0);
         }
-        if(player != null) {
+        if (player != null) {
             this.graphicManager.updatePlayerLife();
             if (playerManager.getPlayer().isAlive()) {
                 spawnEnemies();
@@ -75,9 +75,7 @@ public class GameManager {
                 if (!gameOver) {
                     gameOver = true;
                     Label message = graphicManager.showEndOfGameScreen();
-                    message.setOnMouseClicked(event -> {
-                        reset();
-                    });
+                    message.setOnMouseClicked(event -> reset());
                 }
             }
         }
@@ -85,23 +83,22 @@ public class GameManager {
 
     private void manageHit() {
         // Manage bullets
-        List<Bullet> bullets = new ArrayList<Bullet>(graphicManager.getBullets());
-        List<Character> characters = new ArrayList<Character>(graphicManager.getCharacters());
+        List<Bullet> bullets = new ArrayList<>(graphicManager.getBullets());
+        List<Character> characters = new ArrayList<>(graphicManager.getCharacters());
 
-        //We retrieve each bullets on screen and check if they are coliding with something
+        //We retrieve each bullets on screen and check if they are colliding with something
         for (Bullet b : bullets) {
-            for(Character c : characters) {
-                //"checkColides(...)" checks colision but also applies damages
+            for (Character c : characters) {
+                //"checkCollides(...)" checks collision but also applies damages
                 if (b.checkColides(c)) {
                     //if the enemy ha sto be deleted (ex: is dead), 4% chances it drops a health item
                     if (CharacterType.ENEMY.equals(c.getCharacterType())) {
                         Enemy e = (Enemy) c;
                         if (c.isToDelete()) {
-                            if (Math.random() > 0.96) {
+                            if (Math.random() > 0.5) {
                                 dropHealth(c);
                             }
-                            playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier/2.0)));
-                            graphicManager.updatePlayerScore(playerManager.getPlayerScore());
+                            playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier / 2.0)));
                         }
                     }
                 }
@@ -112,62 +109,54 @@ public class GameManager {
     private void checkSpawnableItems() {
         //Manage health items
         for (Health h : graphicManager.getHealths()) {
-            if (h.colide(player) && player.getLife() < 10) {
-                if (!h.isToDelete()) {
+            if (!h.isToDelete() && h.colide(player)) {
+                if (player.getLife() < 10) {
                     player.setLife(player.getLife() + 1);
-                    ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
-                    h.setToDelete(true);
                 }
+                else {
+                    playerManager.addPlayerScore(25);
+                }
+                ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                h.setToDelete(true);
             }
         }
+    }
+
+    public int calculateEnemyLevel() {
+        return (int) (Enemy.MAX_LEVEL * Math.round((Math.random() * globalMultiplier)) / Enemy.MAX_LEVEL);
     }
 
     private void spawnEnemies() {
-        // The delay between enemy spawning is 2250ms. As time passes, this delay is shortened (2250 - time) to increase difficulty. A
-        // When time is 100 from the delay, it cannot go lower, 100 will be the limit
-        // Ex: if you play for an hour, 2250(ms) - 3600(s) = -1350, causing problem.
-        // Also, if you play for an hour, you're an absolute madlad and I thank you for enjoying it
-        Enemy enemy = null;
-
-        if (hasTimePassed(3000.0 / (globalMultiplier/2))) {
-            boolean additionalSpawningChance = Math.random() >= globalMultiplier/10;
-            if(additionalSpawningChance){
-                npcManager.spawnEnemy(0);
+        if (hasTimePassed(3500 / (globalMultiplier))) {
+            npcManager.spawnEnemy(calculateEnemyLevel()).addSpeed(Math.random() * globalMultiplier);
+            //0 to 25% chance of spawning an additional enemy over time
+            if (Math.random() <= globalMultiplier / 20) {
+                npcManager.spawnEnemy(calculateEnemyLevel()).addSpeed(Math.random() * globalMultiplier);
             }
-            double difficulty = 1 + Math.random() * (time / 120);
-            if (difficulty < 4) { //while difficulty can increase, we spawn one ennemy at time
-                enemy = npcManager.spawnEnemy((int) Math.round(difficulty));
-
-            } else { //when we reach end-game, we always spawn level-4 enemies + an extra
-                enemy = npcManager.spawnEnemy(4);
-                if (additionalSpawningChance) {
-                    Character additionalEnemy = npcManager.spawnEnemy((int) (Math.random() * globalMultiplier));
-                    additionalEnemy.setSpeed(additionalEnemy.getSpeed() + Math.random() * globalMultiplier);
-                }
-            }
-            //Speed is randomly set + modifier depending on time spent on the game
-            enemy.setSpeed(enemy.getSpeed() + Math.random() * globalMultiplier);
         }
     }
 
-    public void dropHealth(Character c){
+
+    public void dropHealth(Character c) {
         Point p = new Point();
-        p.setLocation(c.getX(), c.getY() + c.getHeight()/2);
+        p.setLocation(c.getX(), c.getY() + c.getHeight() / 2);
         Health health = new Health(c.getPosition(), 1, 1, SpriteType.HEART);
         graphicManager.add(health);
     }
 
-    public void reset(){
+    public void reset() {
         ResourcesManager.getInstance().reset();
         init();
         start();
     }
 
+    private double lastTime = 0;
+
     public boolean hasTimePassed(double millisecond) {
-        if (time != 0) {
-            if (time % (millisecond / 1000) <= GraphicManager.FRAME_TIME) {
-                return true;
-            }
+        millisecond /= 1000;
+        if (time == 0 || lastTime + millisecond <= time) {
+            lastTime = time;
+            return true;
         }
         return false;
     }
@@ -177,7 +166,7 @@ public class GameManager {
 
         playerManager.setPlayerScore(0);
         graphicManager.setPlayer(playerManager.getPlayer());
-        graphicManager.updatePlayerScore(0);
+        graphicManager.updatePlayerScore(playerManager.getPlayerScore() + "/" + playerManager.getNextScoreRewardStep());
         graphicManager.updatePlayerLife();
         graphicManager.start();
 
@@ -212,7 +201,6 @@ public class GameManager {
             }
         });
         fadeTransition.play();
-
 
 
     }

@@ -4,13 +4,12 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
 import main.classes.Character;
-import main.classes.Sprite;
 import main.classes.SpriteType;
 import main.classes.Weapon;
 
 import java.awt.*;
+import java.util.LinkedHashMap;
 
 public class PlayerManager {
 
@@ -24,24 +23,42 @@ public class PlayerManager {
     private boolean isMovingLeft;
     private boolean isMovingRight;
 
-
-
+    private LinkedHashMap<Integer, Weapon> rewardWeapons;
+    private int nextScoreRewardStep;
     private Point spawnPoint;
 
     private GraphicManager graphicManager;
+    private boolean highestRewardReached;
 
-    public PlayerManager(GraphicManager graphicManager){
+    public PlayerManager(GraphicManager graphicManager) {
         this.graphicManager = graphicManager;
 
         spawnPoint = new Point();
 
         player = new Character(5, SpriteType.PLAYER);
-        player.setPosition(graphicManager.getScreenWidth()/4,graphicManager.getPane().getHeight()/2);
+        player.setLife(10);
+        player.setPosition(graphicManager.getScreenWidth() / 4, graphicManager.getPane().getHeight() / 2);
 
         isMovingUp = false;
         isMovingDown = false;
         isMovingLeft = false;
         isMovingRight = false;
+
+        rewardWeapons = new LinkedHashMap<>();
+        rewardWeapons.put(500, new Weapon(3, 1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
+        rewardWeapons.put(2000, new Weapon(4, 1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
+        rewardWeapons.put(7500, new Weapon(2, 4, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+        rewardWeapons.put(12500, new Weapon(3, 4, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+        rewardWeapons.put(20000, new Weapon(4, 4, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
+        rewardWeapons.put(30000, new Weapon(11, 2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(60000, new Weapon(11, 3, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(100000, new Weapon(11, 5, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(150000, new Weapon(16, 5, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(300000, new Weapon(16, 8, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(500000, new Weapon(20, 8, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(750000, new Weapon(20, 15, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        rewardWeapons.put(1000000, new Weapon(30, 15, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
+        nextScoreRewardStep = rewardWeapons.keySet().stream().mapToInt(value -> value).min().orElse(-1);
     }
 
     public Integer getPlayerScore() {
@@ -52,62 +69,33 @@ public class PlayerManager {
         this.playerScore = playerScore;
     }
 
-    //TODO: rework this to make upgrades manageable more easily
-    public void addPlayerScore(Integer scoreToAdd){
-        int unlockedBonusesTmp = unlockedBonuses;
+    public void addPlayerScore(Integer scoreToAdd) {
         this.setPlayerScore(playerScore + scoreToAdd);
-        if(unlockedBonuses == 0 && getPlayerScore() >= 2000){
-            this.player.setWeapon(new Weapon(5,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 1 && getPlayerScore() >= 10000){
-            this.player.setWeapon(new Weapon(3,3, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 2 && getPlayerScore() >= 17500){
-            this.player.setWeapon(new Weapon(3,5, FilesName.SHOOT2, SpriteType.PLAYER_BULLET2));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 3 && getPlayerScore() >= 30000){
-            this.player.setWeapon(new Weapon(10,2, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 4 && getPlayerScore() >= 60000){
-            this.player.setWeapon(new Weapon(10,3, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 5 && getPlayerScore() >= 100000){
-            this.player.setWeapon(new Weapon(10,5, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 6 && getPlayerScore() >= 150000){
-            this.player.setWeapon(new Weapon(15,5, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 7 && getPlayerScore() >= 300000){
-            this.player.setWeapon(new Weapon(20,8, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 8 && getPlayerScore() >= 500000){
-            this.player.setWeapon(new Weapon(20,12, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
-        else if(unlockedBonuses == 8 && getPlayerScore() >= 1000000){
-            this.player.setWeapon(new Weapon(30,15, FilesName.SHOOT3, SpriteType.PLAYER_BULLET3));
-            unlockedBonuses++;
-        }
+        graphicManager.updatePlayerScore(getPlayerScore() + "/" + getNextScoreRewardStep());
+        checkForUpgrades();
+    }
 
-        if(unlockedBonusesTmp != unlockedBonuses) {
+    public void checkForUpgrades(){
+        if(nextScoreRewardStep <= playerScore && !highestRewardReached){
+            player.setWeapon(rewardWeapons.get(nextScoreRewardStep));
             ResourcesManager.getInstance().playSound(FilesName.UPGRADE, 5);
+            rewardWeapons.remove(nextScoreRewardStep);
+            nextScoreRewardStep = rewardWeapons.keySet().stream().mapToInt(value -> value).min().orElse(-1);
+            if(nextScoreRewardStep == -1){
+                highestRewardReached = true;
+            }
         }
     }
 
-    public void enableKeyboardControl(boolean enabled){
-        if(enabled){
+    public int getNextScoreRewardStep(){
+        return nextScoreRewardStep;
+    }
+    public void enableKeyboardControl(boolean enabled) {
+        if (enabled) {
             graphicManager.getStage().getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent event) {
-                    switch (event.getCode()){
+                    switch (event.getCode()) {
                         case Z:
                             isMovingUp = true;
                             break;
@@ -151,17 +139,16 @@ public class PlayerManager {
                     updatePlayerCoefficients();
                 }
             });
-        }
-        else{
+        } else {
             graphicManager.getStage().getScene().setOnKeyPressed(null);
             graphicManager.getStage().getScene().setOnKeyReleased(null);
         }
     }
 
-    public void enableMouseControl(boolean enabled){
+    public void enableMouseControl(boolean enabled) {
         Scene scene = graphicManager.getStage().getScene();
 
-        if(enabled){
+        if (enabled) {
             scene.setOnMouseMoved(event -> {
                 moveToCursor(event);
             });
@@ -177,8 +164,7 @@ public class PlayerManager {
             scene.setOnMouseReleased(event -> {
                 this.player.setIsShooting(false);
             });
-        }
-        else{
+        } else {
             scene.setOnMouseMoved(null);
             scene.setOnMouseDragged(null);
             scene.setOnMousePressed(null);
@@ -187,25 +173,23 @@ public class PlayerManager {
 
     }
 
-    public void moveToCursor(MouseEvent mouseEvent){
-        if(graphicManager.getPane().intersects(mouseEvent.getX(), mouseEvent.getY(), 1, 1))
-        this.player.setPosition(mouseEvent.getX(), mouseEvent.getY());
+    public void moveToCursor(MouseEvent mouseEvent) {
+        if (graphicManager.getPane().intersects(mouseEvent.getX(), mouseEvent.getY(), 1, 1))
+            this.player.setPosition(mouseEvent.getX(), mouseEvent.getY());
     }
 
     public void updatePlayerCoefficients() {
-        if(isMovingRight ^ isMovingLeft){
-            if(isMovingLeft) player.setMovingXcoefficient(-1);
-            if(isMovingRight) player.setMovingXcoefficient(1);
-        }
-        else{
+        if (isMovingRight ^ isMovingLeft) {
+            if (isMovingLeft) player.setMovingXcoefficient(-1);
+            if (isMovingRight) player.setMovingXcoefficient(1);
+        } else {
             player.setMovingXcoefficient(0);
         }
 
-        if(isMovingUp ^ isMovingDown){
-            if(isMovingUp) player.setMovingYcoefficient(-1);
-            if(isMovingDown) player.setMovingYcoefficient(1);
-        }
-        else{
+        if (isMovingUp ^ isMovingDown) {
+            if (isMovingUp) player.setMovingYcoefficient(-1);
+            if (isMovingDown) player.setMovingYcoefficient(1);
+        } else {
             player.setMovingYcoefficient(0);
         }
     }

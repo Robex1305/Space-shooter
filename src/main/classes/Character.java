@@ -23,12 +23,11 @@ public class Character extends Sprite {
     public Character(Point position, double scale, double speed, SpriteType spriteType) {
         super(position, scale, speed, spriteType);
         spritesToAdd = new ArrayList<>();
-        this.life = 10;
-
+        this.life = 1;
         characterType = spriteType.getCharacterType();
         switch (characterType) {
             case PLAYER:
-                this.weapon = new Weapon(2.5,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
+                this.weapon = new Weapon(2,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
                 break;
             case ENEMY:
                 this.movingXcoefficient = -1;

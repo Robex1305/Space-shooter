@@ -43,7 +43,7 @@ public class Sprite extends Rectangle {
         loadSkin();
 
         //DEBUG: hitbox
-        this.setOpacity(0);
+        this.setOpacity(0.5);
         this.setFill(Color.RED);
 
         timer = new AnimationTimer() {
@@ -109,6 +109,9 @@ public class Sprite extends Rectangle {
 
     public void setSpeed(double speed) {
         this.speed = speed;
+    }
+    public void addSpeed(double speed) {
+        this.speed += speed;
     }
 
     public double getSpeed() {
@@ -202,6 +205,7 @@ public class Sprite extends Rectangle {
             if (this.getBoundsInParent().intersects(sprite.getBoundsInParent())) {
                 return true;
             }
+
         }
         return false;
     }

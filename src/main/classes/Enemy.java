@@ -1,6 +1,10 @@
 package main.classes;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 public class Enemy extends Character{
+
+    public static final int MAX_LEVEL = 4;
     private Character target;
     private Integer level;
     private boolean folowTarget;
@@ -42,6 +46,9 @@ public class Enemy extends Character{
             setSpriteType(SpriteType.ENEMY4);
             setLife(30);
             setSpeed(2);
+        }
+        else{
+            throw new IllegalArgumentException("Enemy of level " + level + " are not defined");
         }
     }
 

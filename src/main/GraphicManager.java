@@ -18,9 +18,7 @@ import main.classes.Character;
 
 import java.awt.*;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
 
 public class GraphicManager {
@@ -47,7 +45,7 @@ public class GraphicManager {
 
     final public static double FRAME_TIME = 0.0167;
 
-    public GraphicManager(Stage stage){
+    public GraphicManager(Stage stage) {
         toAdd = Collections.synchronizedList(new ArrayList<>());
         toRemove = Collections.synchronizedList(new ArrayList<>());
         characters = Collections.synchronizedList(new ArrayList<>());
@@ -61,12 +59,12 @@ public class GraphicManager {
         this.resourcesManager = ResourcesManager.getInstance();
 
         pane = new Pane();
-        pane.setPrefSize(stage.getWidth(),stage.getHeight());
+        pane.setPrefSize(stage.getWidth(), stage.getHeight());
         Scene scene = new Scene(pane);
         this.stage.setTitle("Space Shooter - v1.0");
         this.stage.setScene(scene);
         this.stage.setResizable(false);
-        if(!this.stage.isShowing()) {
+        if (!this.stage.isShowing()) {
             this.stage.show();
         }
 
@@ -83,12 +81,17 @@ public class GraphicManager {
         this.animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                update();
+                try {
+                    update();
+                } catch (ConcurrentModificationException e) {
+                    //TODO: Make update thread safe on toAdd and toRemove lists
+                    System.out.println("Wargning: ConcurentModificationException detected");
+                }
             }
         };
 
         playerLife = new Text();
-        playerLife.setX(getScreenWidth() /2);
+        playerLife.setX(getScreenWidth() / 2);
         playerLife.setY(30);
         playerLife.setFill(Color.RED);
 
@@ -120,11 +123,11 @@ public class GraphicManager {
         return getStage().getScene().getHeight();
     }
 
-    public void updatePlayerScore(Integer score){
+    public void updatePlayerScore(String score) {
         this.playerScore.setText("SCORE: " + score);
     }
 
-    public void updatePlayerLife(){
+    public void updatePlayerLife() {
         if (player != null) {
             if (player.getLife() > 0) {
                 StringBuilder lifeBar = new StringBuilder();
@@ -138,55 +141,45 @@ public class GraphicManager {
         }
     }
 
-    public Pane getPane(){
+    public Pane getPane() {
         return this.pane;
     }
 
-    public Stage getStage(){
+    public Stage getStage() {
         return this.stage;
     }
 
-    public void start(){
+    public void start() {
         this.animationTimer.start();
     }
 
-    public void stop(){
+    public void stop() {
         this.animationTimer.stop();
     }
 
-    public void add(Node node){
-        if(!toAdd.contains(node)){
-            if(node instanceof Sprite){
+    //TODO: Improve type management
+    public void add(Node node) {
+        if (!toAdd.contains(node)) {
+            if (node instanceof Sprite) {
                 Sprite sprite = (Sprite) node;
                 toAdd.add(sprite);
-                if(sprite.getSkin() != null) {
+                if (sprite.getSkin() != null) {
                     toAdd.add(sprite.getSkin());
                 }
-            }
-            else {
+            } else {
                 toAdd.add(node);
             }
         }
 
-        if(node instanceof Character){
-            Character c = (Character) node;
-            if(!characters.contains(c)){
-                characters.add(c);
-            }
+        if (node instanceof Character) {
+            characters.add((Character) node);
+        }
+        else if (node instanceof Bullet) {
+            bullets.add((Bullet) node);
         }
 
-        if(node instanceof Bullet){
-            Bullet b = (Bullet) node;
-            if(!bullets.contains(b)){
-                bullets.add(b);
-            }
-        }
-
-        if(node instanceof Health){
-            Health h = (Health) node;
-            if(!healths.contains(h)){
-                healths.add(h);
-            }
+        else if (node instanceof Health) {
+            healths.add((Health) node);
         }
     }
 
@@ -198,29 +191,21 @@ public class GraphicManager {
         return characters;
     }
 
-    public void remove(Node node){
-        if(!toRemove.contains(node)){
+    //TODO: Improve type management
+    public void remove(Node node) {
+        if (!toRemove.contains(node)) {
             toRemove.add(node);
         }
-        if(node instanceof Character){
-            Character c = (Character) node;
-            if(characters.contains(c)){
-                characters.remove(c);
-            }
+        if (node instanceof Character) {
+            characters.remove((Character) node);
         }
 
-        if(node instanceof Bullet){
-            Bullet b = (Bullet) node;
-            if(bullets.contains(b)){
-                bullets.remove(b);
-            }
+        if (node instanceof Bullet) {
+            bullets.remove((Bullet) node);
         }
 
-        if(node instanceof Health){
-            Health h = (Health) node;
-            if(healths.contains(h)){
-                healths.remove(h);
-            }
+        if (node instanceof Health) {
+            healths.remove((Health) node);
         }
     }
 
@@ -237,31 +222,31 @@ public class GraphicManager {
         return point;
     }
 
-    public void update(){
+    public void update() {
         //Make the background scrolls
         //It has 2 backgrounds. If one reaches the left edge, it is moved to the right, while the second keeps scrolling
         //to the left, until it reaches the edge, and so on.
-        background1.setX(background1.getX() - (1 + GameManager.globalMultiplier));
-        background2.setX(background2.getX() - (1 + GameManager.globalMultiplier));
+        background1.setX(background1.getX() - (2 * GameManager.globalMultiplier));
+        background2.setX(background2.getX() - (2 * GameManager.globalMultiplier));
 
-        if(background1.getX() <= (-pane.getWidth())){
-            background1.setX(pane.getWidth() - (1 + GameManager.globalMultiplier));
+        if (background1.getX() <= (-pane.getWidth())) {
+            background1.setX(background2.getX() + background2.getImage().getWidth());
         }
-        if(background2.getX() <= (-pane.getWidth())){
-            background2.setX(pane.getWidth() - (1 + GameManager.globalMultiplier));
+        if (background2.getX() <= (-pane.getWidth())) {
+            background2.setX(background1.getX() + background1.getImage().getWidth());
         }
 
         pane.getChildren().forEach(node -> {
-            if(node instanceof Sprite){
+            if (node instanceof Sprite) {
                 Sprite sprite = (Sprite) node;
 
-                if(sprite instanceof Character){
+                if (sprite instanceof Character) {
                     Character character = (Character) sprite;
                     //Adds to the screen all sprites crated by the character. Calling "getSpritesToAdd" return the list but wipes it right after.
                     character.getSpritesToAdd().forEach(this::add);
                 }
 
-                if(sprite.isToDelete()){
+                if (sprite.isToDelete()) {
                     remove(sprite);
                     remove(sprite.getSkin());
                 }
@@ -269,25 +254,25 @@ public class GraphicManager {
         });
 
         Iterator<Node> toRemoveIterator = toRemove.iterator();
-        while(toRemoveIterator.hasNext()) {
+        while (toRemoveIterator.hasNext()) {
             Node n = toRemoveIterator.next();
-            if(n instanceof Sprite){
+            if (n instanceof Sprite) {
                 ((Sprite) n).stopTimer();
             }
-            if(n instanceof Character){
+            if (n instanceof Character) {
                 Character c = (Character) n;
                 characters.remove(c);
-                if(c.getLife() <= 0) {
+                if (c.getLife() <= 0) {
                     explodeAt(c);
                 }
             }
-            if(n instanceof Enemy){
+            if (n instanceof Enemy) {
                 Enemy e = (Enemy) n;
-                if(e.getX() < 0){
+                if (e.getX() < 0) {
                     e.setToDelete(true);
                 }
             }
-            if(n instanceof Bullet){
+            if (n instanceof Bullet) {
                 Bullet b = (Bullet) n;
                 if (b.getX() > getScreenWidth() || b.getX() < 0) {
                     b.setToDelete(true);
@@ -299,9 +284,9 @@ public class GraphicManager {
         }
 
         Iterator<Node> toAddIterator = toAdd.iterator();
-        while (toAddIterator.hasNext()){
+        while (toAddIterator.hasNext()) {
             Node node = toAddIterator.next();
-            if(!pane.getChildren().contains(node)){
+            if (!pane.getChildren().contains(node)) {
                 pane.getChildren().add(node);
             }
         }
@@ -310,18 +295,18 @@ public class GraphicManager {
         toAdd.clear();
     }
 
-    public void explodeAt(Sprite sprite){
+    public void explodeAt(Sprite sprite) {
         TemporarySprite explosion = new TemporarySprite(sprite.getPosition(), 0, 0, SpriteType.EXPLOSION, 1);
         //Using twice the width on purpose to make it square, dependless of the sprite's shape
         explosion.getSkin().setFitWidth(sprite.getWidth());
         explosion.getSkin().setFitHeight(sprite.getWidth());
         explosion.getSkin().setScaleX(sprite.getSkin().getScaleX());
         explosion.getSkin().setScaleY(sprite.getSkin().getScaleY());
-        ResourcesManager.getInstance().playSound(FilesName.EXPLOSION_MP3,8);
+        ResourcesManager.getInstance().playSound(FilesName.EXPLOSION_MP3, 8);
         add(explosion);
     }
 
-    public ImageView getImage(String name, double x, double y, double width, double height){
+    public ImageView getImage(String name, double x, double y, double width, double height) {
         InputStream imageInputStream = resourcesManager.getFileStream(name);
         Image image = new Image(imageInputStream, width, height, false, true);
         ImageView imageView = new ImageView();
@@ -340,7 +325,7 @@ public class GraphicManager {
         message.setMinWidth(getScreenWidth());
         message.setMaxWidth(getScreenWidth());
         message.setAlignment(Pos.CENTER);
-        message.setTranslateY(getScreenHeight()/2);
+        message.setTranslateY(getScreenHeight() / 2);
 
         message.setOnMouseEntered(event -> {
             message.setTextFill(Color.GOLD);
