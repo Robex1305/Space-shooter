@@ -127,7 +127,7 @@ public class GameManager {
     }
 
     private void spawnEnemies() {
-        if (hasTimePassed(3500 / (globalMultiplier))) {
+        if (hasTimePassed(8500, true) && hasTimePassed(3500 / (globalMultiplier))) {
             npcManager.spawnEnemy(calculateEnemyLevel()).addSpeed(Math.random() * globalMultiplier);
             //0 to 25% chance of spawning an additional enemy over time
             if (Math.random() <= globalMultiplier / 20) {
@@ -153,7 +153,14 @@ public class GameManager {
     private double lastTime = 0;
 
     public boolean hasTimePassed(double millisecond) {
+        return hasTimePassed(millisecond, false);
+    }
+
+    public boolean hasTimePassed(double millisecond, boolean fromStart) {
         millisecond /= 1000;
+        if(fromStart){
+            return millisecond <= time;
+        }
         if (time == 0 || lastTime + millisecond <= time) {
             lastTime = time;
             return true;
@@ -162,6 +169,7 @@ public class GameManager {
     }
 
     public void start() {
+        initTimer();
         ResourcesManager.getInstance().startSoundtrack(15, false);
 
         playerManager.setPlayerScore(0);
@@ -186,18 +194,7 @@ public class GameManager {
                 playerManager.enableMouseControl(true);
                 playerManager.enableKeyboardControl(false);
                 graphicManager.remove(veil);
-                new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            sleep(5500);
-                            initTimer();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        super.run();
-                    }
-                }.start();
+
             }
         });
         fadeTransition.play();

@@ -150,6 +150,7 @@ public class Character extends Sprite {
     @Override
     protected void update() {
         super.update();
+        weapon.updateCooldown();
         if(isShooting){
             shoot();
         }

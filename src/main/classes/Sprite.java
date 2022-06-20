@@ -69,7 +69,6 @@ public class Sprite extends Rectangle {
     }
 
     public void stopTimer() {
-        //Another unexplained nullpointer here...WTF IS GOING ON
         if(this.timer != null) {
             this.timer.stop();
         }
