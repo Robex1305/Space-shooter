@@ -1,29 +1,36 @@
 package main.classes;
 
 public class Bullet extends Sprite {
-    private final Character source;
-
-    public Bullet(Character source, double scale, SpriteType spriteType) {
-        super(source.getPosition(), scale, 6, spriteType);
+    private final Weapon source;
+    private boolean isExplosive;
+    public Bullet(Weapon source, double scale, SpriteType spriteType) {
+        super(source.getSource().getPosition(), scale, 6, spriteType);
         this.source = source;
-        this.setLife(source.getWeapon().getDamages());
+        this.setLife(source.getDamages());
 
-        if (SpriteType.PLAYER.equals(source.spriteType)) {
+
+        if (SpriteType.PLAYER.equals(source.getSource().spriteType)) {
             this.setMovingXcoefficient(1);
             this.speed = 10;
-            this.setPositionY(source.getY() + source.getHeight() / 2);
-            this.setPositionX(source.getX() + source.getSkin().getImage().getWidth());
+            this.setPositionY(source.getSource().getY() + source.getSource().getHeight() / 2);
+            this.setPositionX(source.getSource().getX() + source.getSource().getSkin().getImage().getWidth());
+            if(spriteType.equals(SpriteType.PLAYER_ROCKET)){
+                this.isExplosive = true;
+                this.scale = 0.2;
+                this.speed = 15;
+            }
+
         } else {
             this.getSkin().setRotate(180);
             this.setMovingXcoefficient(-1);
-            this.setPositionY(source.getY() + source.getHeight() / 2);
-            this.setPositionX(source.getX());
+            this.setPositionY(source.getSource().getY() + source.getSource().getHeight() / 2);
+            this.setPositionX(source.getSource().getX());
         }
 
         updateImagePosition();
     }
 
-    public Character getSource() {
+    public Weapon getSource() {
         return source;
     }
 
@@ -33,5 +40,9 @@ public class Bullet extends Sprite {
             return false;
         }
         return super.colides(sprite);
+    }
+
+    public boolean isExplosive() {
+        return isExplosive;
     }
 }

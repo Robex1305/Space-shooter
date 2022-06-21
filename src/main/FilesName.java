@@ -17,6 +17,8 @@ public class FilesName {
     public static final String PLAYER_BULLET1 = imagesFolder + "playerBullet1.png";
     public static final String PLAYER_BULLET2 = imagesFolder + "playerBullet2.png";
     public static final String PLAYER_BULLET3 = imagesFolder + "playerBullet3.png";
+
+    public static final String PLAYER_ROCKET = imagesFolder + "rocket.png";
     public static final String ENEMY1_BULLET = imagesFolder + "enemy1Bullet.png";
     public static final String ENEMY2_BULLET = imagesFolder + "enemy2Bullet.png";
     public static final String ENEMY3_BULLET = imagesFolder + "enemy3Bullet.png";
@@ -31,6 +33,7 @@ public class FilesName {
     public static final String SHOOT2 = soundsFolder + "shoot2.mp3";
     public static final String SHOOT3 = soundsFolder + "shoot3.mp3";
     public static final String EXPLOSION_MP3 = soundsFolder + "destroyed.mp3";
+    public static final String PLAYER_ROCKET_MP3 = soundsFolder + "playerRocket.mp3";
     public static final String SOUNDTRACK = soundsFolder + "soundtrack.mp3";
     public static final String SOUNDTRACK_LOOP = soundsFolder + "soundtrack_loop.mp3";
     public static final String FONT = fontsFolder + "PressStart2P-vaV7.ttf";

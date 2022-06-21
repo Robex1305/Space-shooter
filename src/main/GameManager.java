@@ -71,6 +71,7 @@ public class GameManager {
         if (player != null) {
             this.graphicManager.updatePlayerLife();
             if (playerManager.getPlayer().isAlive()) {
+                graphicManager.updatePlayerAmmo(playerManager.getPlayer().getSecondaryWeapon().getAmmo());
                 spawnEnemies();
                 manageColisions();
             } else {
@@ -89,13 +90,12 @@ public class GameManager {
         // Manage bullets
         List<Bullet> bullets = graphicManager.getSprites().stream().filter(s -> s instanceof Bullet).map(s -> (Bullet) s).collect(Collectors.toList());
         List<Character> characters = graphicManager.getSprites().stream().filter(s -> s instanceof Character).map(s -> (Character) s).collect(Collectors.toList());
-        List<Health> healths = graphicManager.getSprites().stream().filter(s -> s instanceof Health).map(s -> (Health) s).collect(Collectors.toList());
+        List<Item> items = graphicManager.getSprites().stream().filter(s -> s instanceof Item).map(s -> (Item) s).collect(Collectors.toList());
 
-        for (Health health : healths) {
-            if (health.colides(player) && player.getLife() < 10) {
-                player.setLife(player.getLife() + 1);
-                ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
-                health.setToDelete(true);
+        for (Item item : items) {
+            if (item.colides(player)){
+                item.applyEffect(player);
+                item.setToDelete(true);
             }
         }
         //We retrieve each bullets on screen and check if they are colliding with something
@@ -111,15 +111,22 @@ public class GameManager {
                     if(isPlayer){
                         isHit = true;
                     }
+                    if(b.isExplosive()){
+                        graphicManager.explodeAt(b, 3, 15);
+                    }
                 }
             }
             //Check if player has crashed into an enemy
             if(c instanceof Enemy) {
                 Enemy e = (Enemy) c;
                 if(e.isToDelete()){
-                    //if the enemy has to be deleted, then 10% chances it drops a health item + updating player score based on enemy level
+                    // 10% Chance to drop life
                     if (Math.random() > 0.9) {
                         dropHealth(c);
+                    }
+                    // 10% chance to drop ammo
+                    if (Math.random() > 0.9) {
+                        dropAmmo(c);
                     }
                     playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier / 2.0)));
                 }
@@ -158,8 +165,32 @@ public class GameManager {
     public void dropHealth(Character c) {
         Point p = new Point();
         p.setLocation(c.getX(), c.getY() + c.getHeight() / 2);
-        Health health = new Health(c.getPosition(), 1, 1, SpriteType.HEART);
-        graphicManager.add(health);
+        Item item = new Item(c.getPosition(), 1, 1, SpriteType.HEART, new SpriteModificator() {
+            @Override
+            public void applyEffect(Sprite sprite) {
+                if(sprite.getSpriteType().equals(SpriteType.PLAYER) && sprite.getLife() < 10) {
+                    sprite.setLife(sprite.getLife() + 1);
+                    ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                }
+            }
+        });
+        graphicManager.add(item);
+    }
+
+    public void dropAmmo(Character c) {
+        Point p = new Point();
+        p.setLocation(c.getX(), c.getY() + c.getHeight() / 2);
+        Item item = new Item(c.getPosition(), 0.2, 1, SpriteType.PLAYER_ROCKET_AMMO, new SpriteModificator() {
+            @Override
+            public void applyEffect(Sprite sprite) {
+                System.out.println("APPLIED EFFECT");
+                if(sprite.getSpriteType().equals(SpriteType.PLAYER)) {
+                    ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                    ((Character)sprite).getSecondaryWeapon().setAmmo(((Character)sprite).getSecondaryWeapon().getAmmo() + 1);
+                }
+            }
+        });
+        graphicManager.add(item);
     }
 
     public void reset() {
@@ -189,6 +220,7 @@ public class GameManager {
         playerManager.setPlayerScore(0);
         graphicManager.setPlayer(playerManager.getPlayer());
         graphicManager.updatePlayerScore(playerManager.getPlayerScore() + "/" + playerManager.getNextScoreRewardStep());
+        graphicManager.updatePlayerAmmo(playerManager.getPlayer().getSecondaryWeapon().getAmmo());
         graphicManager.updatePlayerLife();
 
         Rectangle veil = new Rectangle(graphicManager.getScreenWidth(), graphicManager.getScreenHeight());

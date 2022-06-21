@@ -15,6 +15,7 @@ public enum SpriteType {
     PLAYER_BULLET1(FilesName.PLAYER_BULLET1, GeneralType.PLAYER),
     PLAYER_BULLET2(FilesName.PLAYER_BULLET2, GeneralType.PLAYER),
     PLAYER_BULLET3(FilesName.PLAYER_BULLET3, GeneralType.PLAYER),
+    PLAYER_BULLET4(FilesName.ENEMY3_BULLET, GeneralType.PLAYER),
     ENEMY1_BULLET(FilesName.ENEMY1_BULLET, GeneralType.ENEMY),
     ENEMY2_BULLET(FilesName.ENEMY2_BULLET, GeneralType.ENEMY),
     ENEMY3_BULLET(FilesName.ENEMY3_BULLET, GeneralType.ENEMY),
@@ -22,7 +23,9 @@ public enum SpriteType {
     ASTEROID(FilesName.ASTEROID, GeneralType.ENEMY),
     STAR(FilesName.STAR, GeneralType.MISC),
     EXPLOSION(FilesName.EXPLOSION_GIF, GeneralType.MISC),
-    HEART(FilesName.HEART, GeneralType.MISC);
+    HEART(FilesName.HEART, GeneralType.MISC),
+    PLAYER_ROCKET(FilesName.PLAYER_ROCKET, GeneralType.PLAYER ),
+    PLAYER_ROCKET_AMMO(FilesName.PLAYER_ROCKET, GeneralType.MISC );
 
     private String model;
     private GeneralType generalType;

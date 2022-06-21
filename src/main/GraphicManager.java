@@ -36,6 +36,8 @@ public class GraphicManager {
 
     private Text playerLife;
     private Text playerScore;
+
+    private Text playerAmmo;
     private ImageView background1;
     private ImageView background2;
 
@@ -84,10 +86,19 @@ public class GraphicManager {
         playerScore.setY(30);
         playerScore.setFill(Color.WHITE);
 
+        playerAmmo = new Text();
+        playerAmmo.setX(playerLife.getX() - 100);
+        playerAmmo.setY(30);
+        playerAmmo.setFill(Color.WHITE);
+        ImageView ammoIcon = getImage(FilesName.PLAYER_ROCKET,playerAmmo.getX() - 100, 0, 80, 45);
+
         this.playerScore.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
+        this.playerAmmo.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
         this.playerLife.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
         add(playerScore);
         add(playerLife);
+        add(playerAmmo);
+        add(ammoIcon);
     }
 
     public void setPlayer(Character player) {
@@ -105,6 +116,9 @@ public class GraphicManager {
 
     public void updatePlayerScore(String score) {
         this.playerScore.setText("SCORE: " + score);
+    }
+    public void updatePlayerAmmo(int ammo) {
+        this.playerAmmo.setText("x " + ammo);
     }
 
     public void updatePlayerLife() {
@@ -187,9 +201,6 @@ public class GraphicManager {
                 //Adds to the screen all sprites created by the character. Calling "getSpritesToAdd" return the list but wipes it right after.
                 sprite.getSpritesToAdd().forEach(this::add);
                 sprite.getSpritesToAdd().clear();
-                if(isCompletelyOffscreen(sprite)){
-                    System.out.println("sprite " + sprite.getSpriteType() + " is offscreen!");
-                }
                 if (sprite.isToDelete() || isCompletelyOffscreen(sprite)) {
                     remove(sprite);
                     remove(sprite.getSkin());;
@@ -220,13 +231,17 @@ public class GraphicManager {
     }
 
     public void explodeAt(Sprite sprite) {
-        TemporarySprite explosion = new TemporarySprite(sprite.getPosition(), 0, 0, SpriteType.EXPLOSION, 1);
+        explodeAt(sprite, 1, 8);
+    }
+
+    public void explodeAt(Sprite sprite, double scale, double volume) {
+        TemporarySprite explosion = new TemporarySprite(sprite.getPosition(), scale, 0, SpriteType.EXPLOSION, 1);
         //Using twice the width on purpose to make it square, dependless of the sprite's shape
         explosion.getSkin().setFitWidth(sprite.getWidth());
         explosion.getSkin().setFitHeight(sprite.getWidth());
-        explosion.getSkin().setScaleX(sprite.getSkin().getScaleX());
-        explosion.getSkin().setScaleY(sprite.getSkin().getScaleY());
-        ResourcesManager.getInstance().playSound(FilesName.EXPLOSION_MP3, 8);
+        explosion.getSkin().setScaleX(sprite.getSkin().getScaleX() * scale);
+        explosion.getSkin().setScaleY(sprite.getSkin().getScaleY() * scale);
+        ResourcesManager.getInstance().playSound(FilesName.EXPLOSION_MP3, volume);
         add(explosion);
     }
 

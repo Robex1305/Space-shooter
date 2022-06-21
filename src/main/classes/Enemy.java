@@ -1,8 +1,5 @@
 package main.classes;
 
-import main.GameManager;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 public class Enemy extends Character{
 
     public static final int MAX_LEVEL = 4;
@@ -20,7 +17,7 @@ public class Enemy extends Character{
             isShooting = true;
         }
         if(level == 0){
-            setWeapon(new Weapon(0, 0));
+            setMainWeapon(new Weapon(this, 0, 0));
             double delta = 0.2 + Math.random(); //allows to have small/fast asteroids or big/slow ones (min: 0.2)
             setLife((int) (10.0*delta));
             setSpeed(1.5/delta);
@@ -29,21 +26,21 @@ public class Enemy extends Character{
             applyRotation(-getSpeed());
         }
         else if(level == 1) {
-            setWeapon(new Weapon(0.15, 1));
+            setMainWeapon(new Weapon(this, 0.15, 1));
             setLife(4);
             setSpeed(1.7);
             applyRotation(-getSpeed());
         } else if(level == 2) {
-            setWeapon(new Weapon(0.4, 1));
+            setMainWeapon(new Weapon(this, 0.4, 1));
             setLife(6);
             setSpeed(2);
             folowTarget = true;
         } else if(level == 3) {
-            setWeapon(new Weapon(0.24, 2));
+            setMainWeapon(new Weapon(this, 0.24, 2));
             setLife(15);
             setSpeed(1);
         } else if(level == 4) {
-            setWeapon(new Weapon(0.18, 3));
+            setMainWeapon(new Weapon(this, 0.18, 3));
             setSpriteType(SpriteType.ENEMY4);
             setLife(30);
             setSpeed(2);
