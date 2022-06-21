@@ -1,6 +1,7 @@
 package main;
 
-import javafx.animation.*;
+import javafx.animation.AnimationTimer;
+import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
@@ -8,11 +9,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import main.classes.*;
 import main.classes.Character;
+import main.classes.*;
 
-import java.awt.Point;
-import java.util.*;
+import java.awt.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GameManager {
     protected Stage stage;
@@ -20,9 +22,9 @@ public class GameManager {
     protected PlayerManager playerManager;
     protected NpcManager npcManager;
 
-    protected Timer timer;
+    protected AnimationTimer timer;
     private boolean gameOver;
-    protected double time;
+    protected static double time;
 
     private Character player;
 
@@ -34,30 +36,31 @@ public class GameManager {
         init();
     }
 
+    public static double getTime() {
+        return time;
+    }
+
     public void init() {
         globalMultiplier = 1.0;
         if (timer != null) {
-            timer.cancel();
-            timer.purge();
+            timer.stop();
         }
+        time = 0.0;
+        lastTime = 0.0;
+        timer = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                update();
+                graphicManager.update();
+                time += GraphicManager.FRAME_TIME;
+            }
+        };
+        timer.start();
         time = 0.0;
         gameOver = false;
         graphicManager = new GraphicManager(stage);
         playerManager = new PlayerManager(graphicManager);
         npcManager = new NpcManager(graphicManager, playerManager.getPlayer());
-    }
-
-    public void initTimer() {
-        time = 0.0;
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                update();
-                time += GraphicManager.FRAME_TIME;
-                graphicManager.setTime(time);
-            }
-        }, 0, Math.round(GraphicManager.FRAME_TIME * 1000));
     }
 
     public void update() {
@@ -69,11 +72,11 @@ public class GameManager {
             this.graphicManager.updatePlayerLife();
             if (playerManager.getPlayer().isAlive()) {
                 spawnEnemies();
-                checkSpawnableItems();
-                manageHit();
+                manageColisions();
             } else {
                 if (!gameOver) {
                     gameOver = true;
+                    graphicManager.explodeAt(player);
                     Label message = graphicManager.showEndOfGameScreen();
                     message.setOnMouseClicked(event -> reset());
                 }
@@ -81,43 +84,58 @@ public class GameManager {
         }
     }
 
-    private void manageHit() {
+    // TODO: Find a better way to manage colision
+    private void manageColisions() {
         // Manage bullets
-        List<Bullet> bullets = new ArrayList<>(graphicManager.getBullets());
-        List<Character> characters = new ArrayList<>(graphicManager.getCharacters());
+        List<Bullet> bullets = graphicManager.getSprites().stream().filter(s -> s instanceof Bullet).map(s -> (Bullet) s).collect(Collectors.toList());
+        List<Character> characters = graphicManager.getSprites().stream().filter(s -> s instanceof Character).map(s -> (Character) s).collect(Collectors.toList());
+        List<Health> healths = graphicManager.getSprites().stream().filter(s -> s instanceof Health).map(s -> (Health) s).collect(Collectors.toList());
 
+        for (Health health : healths) {
+            if (health.colides(player) && player.getLife() < 10) {
+                player.setLife(player.getLife() + 1);
+                ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                health.setToDelete(true);
+            }
+        }
         //We retrieve each bullets on screen and check if they are colliding with something
-        for (Bullet b : bullets) {
-            for (Character c : characters) {
-                //"checkCollides(...)" checks collision but also applies damages
-                if (b.checkColides(c)) {
-                    //if the enemy ha sto be deleted (ex: is dead), 4% chances it drops a health item
-                    if (CharacterType.ENEMY.equals(c.getCharacterType())) {
-                        Enemy e = (Enemy) c;
-                        if (c.isToDelete()) {
-                            if (Math.random() > 0.9) {
-                                dropHealth(c);
-                            }
-                            playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier / 2.0)));
-                        }
+
+        for (Character c : characters) {
+            boolean isPlayer = c == player;
+            boolean isHit = false;
+            //Loop on bullet to apply damages if character colides with
+            for (Bullet b : bullets) {
+                if (b.colides(c)) {
+                    c.setLife(c.getLife() - b.getLife());
+                    b.setLife(0);
+                    if(isPlayer){
+                        isHit = true;
                     }
                 }
             }
-        }
-    }
-
-    private void checkSpawnableItems() {
-        //Manage health items
-        for (Health h : graphicManager.getHealths()) {
-            if (!h.isToDelete() && h.colide(player)) {
-                if (player.getLife() < 10) {
-                    player.setLife(player.getLife() + 1);
+            //Check if player has crashed into an enemy
+            if(c instanceof Enemy) {
+                Enemy e = (Enemy) c;
+                if(e.isToDelete()){
+                    //if the enemy has to be deleted, then 10% chances it drops a health item + updating player score based on enemy level
+                    if (Math.random() > 0.9) {
+                        dropHealth(c);
+                    }
+                    playerManager.addPlayerScore((int) ((e.getLevel() < 1 ? 150.0 : 100.0 * e.getLevel()) * (globalMultiplier / 2.0)));
                 }
-                else {
-                    playerManager.addPlayerScore(25);
+                //No score points/health on crashing
+                else if (e.colides(player)) {
+                    int tmpPlayerLife = player.getLife();
+                    player.setLife(player.getLife() - e.getLife());
+                    e.setLife(e.getLife() - tmpPlayerLife);
+                    isHit = true;
                 }
-                ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
-                h.setToDelete(true);
+            }
+            if(c.isToDelete()){
+                graphicManager.explodeAt(c);
+            }
+            if(isHit){
+                ResourcesManager.getInstance().playSound(FilesName.HIT, 100);
             }
         }
     }
@@ -127,7 +145,7 @@ public class GameManager {
     }
 
     private void spawnEnemies() {
-        if (hasTimePassed(8500, true) && hasTimePassed(3500 / (globalMultiplier))) {
+        if (hasTimePassed(8500, 0) && hasTimePassed(3500 / (globalMultiplier))) {
             npcManager.spawnEnemy(calculateEnemyLevel()).addSpeed(Math.random() * globalMultiplier);
             //0 to 25% chance of spawning an additional enemy over time
             if (Math.random() <= globalMultiplier / 20) {
@@ -153,30 +171,25 @@ public class GameManager {
     private double lastTime = 0;
 
     public boolean hasTimePassed(double millisecond) {
-        return hasTimePassed(millisecond, false);
-    }
-
-    public boolean hasTimePassed(double millisecond, boolean fromStart) {
-        millisecond /= 1000;
-        if(fromStart){
-            return millisecond <= time;
-        }
-        if (time == 0 || lastTime + millisecond <= time) {
+        if (hasTimePassed(millisecond, lastTime)) {
             lastTime = time;
             return true;
         }
         return false;
     }
 
+    public boolean hasTimePassed(double millisecond, double since) {
+        millisecond /= 1000;
+        return since + millisecond <= time;
+    }
+
     public void start() {
-        initTimer();
         ResourcesManager.getInstance().startSoundtrack(15, false);
 
         playerManager.setPlayerScore(0);
         graphicManager.setPlayer(playerManager.getPlayer());
         graphicManager.updatePlayerScore(playerManager.getPlayerScore() + "/" + playerManager.getNextScoreRewardStep());
         graphicManager.updatePlayerLife();
-        graphicManager.start();
 
         Rectangle veil = new Rectangle(graphicManager.getScreenWidth(), graphicManager.getScreenHeight());
         veil.setId("startingVeil");

@@ -1,14 +1,16 @@
 package main.classes;
 
-import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+import main.GameManager;
 import main.ResourcesManager;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 //TODO: make it extends circle for more accurate hitbox
 public class Sprite extends Rectangle {
@@ -18,16 +20,16 @@ public class Sprite extends Rectangle {
     protected double scale;
     protected double rotationSpeed;
 
-    protected Rotate rotate;
     protected double movingXcoefficient;
     protected double movingYcoefficient;
     protected boolean isToDelete;
 
-    protected AnimationTimer timer;
+    protected double createdAt;
 
     protected ResourcesManager resourcesManager;
+    protected Integer life;
 
-    private Weapon weapon;
+    private List<Sprite> spritesToAdd;
 
     public Sprite(double scale, double speed, SpriteType spriteType) {
         this(new Point(), scale, speed, spriteType);
@@ -35,6 +37,8 @@ public class Sprite extends Rectangle {
 
     public Sprite(Point position, double scale, double speed, SpriteType spriteType) {
         super(position.getX(), position.getY(), 0, 0);
+        createdAt = GameManager.getTime();
+        spritesToAdd = new ArrayList<>();
         this.resourcesManager = ResourcesManager.getInstance();
         this.speed = speed;
         this.scale = scale;
@@ -46,31 +50,29 @@ public class Sprite extends Rectangle {
         //DEBUG: hitbox
         this.setOpacity(0.0);
         this.setFill(Color.RED);
-
-        timer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                update();
-            }
-        };
-
-        timer.start();
+        this.life = 1;
     }
 
-    protected void update() {
-        if(!isToDelete()) {
+    public void setLife(Integer life) {
+        this.life = life;
+    }
+
+    public Integer getLife() {
+        return this.life;
+    }
+
+    public List<Sprite> getSpritesToAdd() {
+        return spritesToAdd;
+    }
+
+    public void update() {
+        if (!isToDelete()) {
             move();
             if (!SpriteType.PLAYER.equals(spriteType)) {
                 if (getX() + getWidth() < 0) {
-                    isToDelete = true;
+                    setToDelete(true);
                 }
             }
-        }
-    }
-
-    public void stopTimer() {
-        if(this.timer != null) {
-            this.timer.stop();
         }
     }
 
@@ -79,14 +81,14 @@ public class Sprite extends Rectangle {
     }
 
     public boolean isToDelete() {
-        return isToDelete;
+        return isToDelete || !isAlive();
     }
 
     public void move() {
         setX(getX() + movingXcoefficient * speed);
         setY(getY() + movingYcoefficient * speed);
         updateImagePosition();
-        if(this.rotationSpeed != 0) {
+        if (this.rotationSpeed != 0) {
             this.getSkin().setRotate(this.skin.getRotate() + this.rotationSpeed);
         }
     }
@@ -110,6 +112,7 @@ public class Sprite extends Rectangle {
     public void setSpeed(double speed) {
         this.speed = speed;
     }
+
     public void addSpeed(double speed) {
         this.speed += speed;
     }
@@ -127,12 +130,12 @@ public class Sprite extends Rectangle {
         loadSkin();
     }
 
-    public void adjustHitboxSize(double ratioX, double ratioY){
+    public void adjustHitboxSize(double ratioX, double ratioY) {
         this.setScaleX(ratioX);
         this.setScaleY(ratioY);
     }
 
-    public void adjustImageSize(double ratioX, double ratioY){
+    public void adjustImageSize(double ratioX, double ratioY) {
         this.getSkin().setScaleX(ratioX);
         this.getSkin().setScaleY(ratioY);
     }
@@ -200,14 +203,21 @@ public class Sprite extends Rectangle {
         return position;
     }
 
-    public boolean colide(Sprite sprite) {
-        if (!sprite.isToDelete) {
+    public boolean isSameTypeAs(Sprite s) {
+        return this.getSpriteType().getGeneralType().equals(s.getSpriteType().getGeneralType());
+    }
+
+    public boolean colides(Sprite sprite) {
+        if (!sprite.isToDelete() && !this.isToDelete() && !this.isSameTypeAs(sprite)) {
             if (this.getBoundsInParent().intersects(sprite.getBoundsInParent())) {
                 return true;
             }
-
         }
         return false;
+    }
+
+    public boolean isAlive() {
+        return getLife() > 0;
     }
 
 }

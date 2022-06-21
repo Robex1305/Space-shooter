@@ -25,6 +25,7 @@ public class TemporarySprite extends Sprite {
         return lifespanElapsed;
     }
 
+
     @Override
     public void update() {
         super.update();

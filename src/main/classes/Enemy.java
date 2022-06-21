@@ -1,5 +1,6 @@
 package main.classes;
 
+import main.GameManager;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Enemy extends Character{
@@ -76,7 +77,6 @@ public class Enemy extends Character{
     @Override
     public void move() {
         super.move();
-        checkColides(target);
     }
 
     public Character getTarget() {
@@ -96,7 +96,7 @@ public class Enemy extends Character{
     }
 
     @Override
-    protected void update() {
+    public void update() {
         super.update();
         if(folowTarget && target.isAlive()) {
             if (getY() < target.getY()) {

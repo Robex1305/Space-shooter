@@ -1,6 +1,6 @@
 package main.classes;
 
-public enum CharacterType {
+public enum GeneralType {
     PLAYER,
     ENEMY,
     MISC

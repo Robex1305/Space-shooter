@@ -1,6 +1,5 @@
 package main;
 
-import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -13,28 +12,27 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import main.classes.*;
 import main.classes.Character;
+import main.classes.Sprite;
+import main.classes.SpriteType;
+import main.classes.TemporarySprite;
 
 import java.awt.*;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GraphicManager {
     private ResourcesManager resourcesManager;
 
     private Stage stage;
     private Pane pane;
-    private double time;
-    private AnimationTimer animationTimer;
 
     private List<Node> toAdd;
     private List<Node> toRemove;
 
-    private List<Bullet> bullets;
-    private List<Character> characters;
-    private List<Health> healths;
+    private List<Sprite> sprites;
 
     private Text playerLife;
     private Text playerScore;
@@ -46,11 +44,9 @@ public class GraphicManager {
     final public static double FRAME_TIME = 0.0167;
 
     public GraphicManager(Stage stage) {
-        toAdd = Collections.synchronizedList(new ArrayList<>());
-        toRemove = Collections.synchronizedList(new ArrayList<>());
-        characters = Collections.synchronizedList(new ArrayList<>());
-        bullets = Collections.synchronizedList(new ArrayList<>());
-        healths = Collections.synchronizedList(new ArrayList<>());
+        toAdd = new ArrayList<>();
+        toRemove = new ArrayList<>();
+        sprites = new ArrayList<>();
 
         this.stage = stage;
         this.stage.setWidth(1280);
@@ -78,18 +74,6 @@ public class GraphicManager {
 
         scene.setCursor(Cursor.NONE);
 
-        this.animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                try {
-                    update();
-                } catch (ConcurrentModificationException e) {
-                    //TODO: Make update thread safe on toAdd and toRemove lists
-                    System.out.println("Wargning: ConcurentModificationException detected");
-                }
-            }
-        };
-
         playerLife = new Text();
         playerLife.setX(getScreenWidth() / 2);
         playerLife.setY(30);
@@ -104,10 +88,6 @@ public class GraphicManager {
         this.playerLife.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
         add(playerScore);
         add(playerLife);
-    }
-
-    public void setTime(double time) {
-        this.time = time;
     }
 
     public void setPlayer(Character player) {
@@ -149,15 +129,6 @@ public class GraphicManager {
         return this.stage;
     }
 
-    public void start() {
-        this.animationTimer.start();
-    }
-
-    public void stop() {
-        this.animationTimer.stop();
-    }
-
-    //TODO: Improve type management
     public void add(Node node) {
         if (!toAdd.contains(node)) {
             if (node instanceof Sprite) {
@@ -170,47 +141,20 @@ public class GraphicManager {
                 toAdd.add(node);
             }
         }
-
-        if (node instanceof Character) {
-            characters.add((Character) node);
-        }
-        else if (node instanceof Bullet) {
-            bullets.add((Bullet) node);
-        }
-
-        else if (node instanceof Health) {
-            healths.add((Health) node);
-        }
     }
 
-    public List<Bullet> getBullets() {
-        return bullets;
+    public List<Sprite> getSprites() {
+        return sprites;
     }
 
-    public List<Character> getCharacters() {
-        return characters;
-    }
-
-    //TODO: Improve type management
     public void remove(Node node) {
         if (!toRemove.contains(node)) {
             toRemove.add(node);
         }
-        if (node instanceof Character) {
-            characters.remove((Character) node);
-        }
-
-        if (node instanceof Bullet) {
-            bullets.remove((Bullet) node);
-        }
-
-        if (node instanceof Health) {
-            healths.remove((Health) node);
-        }
     }
 
-    public List<Health> getHealths() {
-        return healths;
+    public boolean isCompletelyOffscreen(Sprite sprite) {
+        return sprite.getX() < -sprite.getWidth() || sprite.getX() > getScreenWidth() + (2 * sprite.getWidth());
     }
 
     //Unused
@@ -239,60 +183,40 @@ public class GraphicManager {
         pane.getChildren().forEach(node -> {
             if (node instanceof Sprite) {
                 Sprite sprite = (Sprite) node;
-
-                if (sprite instanceof Character) {
-                    Character character = (Character) sprite;
-                    //Adds to the screen all sprites crated by the character. Calling "getSpritesToAdd" return the list but wipes it right after.
-                    character.getSpritesToAdd().forEach(this::add);
+                sprite.update();
+                //Adds to the screen all sprites created by the character. Calling "getSpritesToAdd" return the list but wipes it right after.
+                sprite.getSpritesToAdd().forEach(this::add);
+                sprite.getSpritesToAdd().clear();
+                if(isCompletelyOffscreen(sprite)){
+                    System.out.println("sprite " + sprite.getSpriteType() + " is offscreen!");
                 }
-
-                if (sprite.isToDelete()) {
+                if (sprite.isToDelete() || isCompletelyOffscreen(sprite)) {
                     remove(sprite);
-                    remove(sprite.getSkin());
+                    remove(sprite.getSkin());;
                 }
+
             }
         });
 
-        Iterator<Node> toRemoveIterator = toRemove.iterator();
-        while (toRemoveIterator.hasNext()) {
-            Node n = toRemoveIterator.next();
-            if (n instanceof Sprite) {
-                ((Sprite) n).stopTimer();
-            }
-            if (n instanceof Character) {
-                Character c = (Character) n;
-                characters.remove(c);
-                if (c.getLife() <= 0) {
-                    explodeAt(c);
-                }
-            }
-            if (n instanceof Enemy) {
-                Enemy e = (Enemy) n;
-                if (e.getX() < 0) {
-                    e.setToDelete(true);
-                }
-            }
-            if (n instanceof Bullet) {
-                Bullet b = (Bullet) n;
-                if (b.getX() > getScreenWidth() || b.getX() < 0) {
-                    b.setToDelete(true);
-                }
-                bullets.remove(n);
-            }
+        for (Node n : toRemove) {
             pane.getChildren().remove(n);
-
+            if (n instanceof Sprite) {
+                sprites.remove(n);
+            }
         }
 
-        Iterator<Node> toAddIterator = toAdd.iterator();
-        while (toAddIterator.hasNext()) {
-            Node node = toAddIterator.next();
+        for (Node node : toAdd) {
             if (!pane.getChildren().contains(node)) {
                 pane.getChildren().add(node);
+            }
+            if (node instanceof Sprite) {
+                sprites.add((Sprite) node);
             }
         }
 
         toRemove.clear();
         toAdd.clear();
+        sprites = pane.getChildren().stream().filter(n -> n instanceof Sprite).map(n -> (Sprite) n).collect(Collectors.toList());
     }
 
     public void explodeAt(Sprite sprite) {

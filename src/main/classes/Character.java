@@ -12,9 +12,7 @@ public class Character extends Sprite {
     //TODO: Add secondary weapon for player...?
     private Weapon weapon;
     protected boolean isShooting;
-    private Integer life;
-    private List<Sprite> spritesToAdd;
-    private CharacterType characterType;
+    private GeneralType generalType;
 
     public Character(double speed, SpriteType spriteType){
         this(new Point(), speed, spriteType);
@@ -24,10 +22,8 @@ public class Character extends Sprite {
     }
     public Character(Point position, double scale, double speed, SpriteType spriteType) {
         super(position, scale, speed, spriteType);
-        spritesToAdd = new ArrayList<>();
-        this.life = 1;
-        characterType = spriteType.getCharacterType();
-        switch (characterType) {
+        generalType = spriteType.getGeneralType();
+        switch (generalType) {
             case PLAYER:
                 this.weapon = new Weapon(2,1, FilesName.SHOOT1, SpriteType.PLAYER_BULLET1);
                 break;
@@ -52,14 +48,6 @@ public class Character extends Sprite {
         this.weapon = weapon;
     }
 
-    public void setLife(Integer life) {
-        this.life = life;
-    }
-
-    public Integer getLife() {
-        return this.life;
-    }
-
     public void setIsShooting(boolean shooting){
         this.isShooting = shooting;
     }
@@ -72,7 +60,7 @@ public class Character extends Sprite {
         if(this.weapon.canShoot()) {
             Bullet bullet = null;
 
-            if(CharacterType.PLAYER.equals(this.characterType)) {
+            if(GeneralType.PLAYER.equals(this.generalType)) {
                 bullet = new Bullet(this, 1, getWeapon().getBulletType());
                 bullet.setMovingXcoefficient(1);
                 bullet.setSpriteType(getWeapon().getBulletType());
@@ -103,52 +91,21 @@ public class Character extends Sprite {
             }
 
             if(this instanceof Enemy){
-                if(((Enemy) this).getTarget() == null){
-                    throw new RuntimeException("Target is null for enemy of type " + this.characterType + "/" + this.spriteType);
-                };
                 if(!((Enemy) this).getTarget().isAlive()){
                     isShooting = false;
                 }
             }
 
             if(isShooting) {
-                spritesToAdd.add(bullet);
+                getSpritesToAdd().add(bullet);
                 this.weapon.setOnCooldown();
             }
         }
     }
 
-    public boolean isAlive(){
-        return life > 0;
-    }
-
-    public boolean checkColides(Character character) {
-        if(character != null) {
-            if (character.getCharacterType() != getCharacterType()) {
-                boolean colides = super.colide(character);
-                if (colides) {
-                    character.takeDamages(life);
-                    takeDamages(life);
-                }
-                return colides;
-            } else {
-                return false;
-            }
-        }
-        else{
-            return false;
-        }
-    }
-
-    public List<Sprite> getSpritesToAdd(){
-        List<Sprite> toReturn = new ArrayList<>();
-        toReturn.addAll(spritesToAdd);
-        spritesToAdd.clear();
-        return toReturn;
-    }
 
     @Override
-    protected void update() {
+    public void update() {
         super.update();
         weapon.updateCooldown();
         if(isShooting){
@@ -156,24 +113,8 @@ public class Character extends Sprite {
         }
     }
 
-    public CharacterType getCharacterType() {
-        return characterType;
-    }
-
-    @Override
-    public boolean isToDelete() {
-        if(this.life <= 0){
-            isToDelete = true;
-        }
-        return  isToDelete;
-    }
-
-
-    public void takeDamages(int damages){
-        if(CharacterType.PLAYER.equals(characterType)){
-            ResourcesManager.getInstance().playSound(FilesName.HIT, 50);
-        }
-        this.life -= damages;
+    public GeneralType getCharacterType() {
+        return generalType;
     }
 }
 
