@@ -50,9 +50,16 @@ public class GameManager {
         timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                update();
-                graphicManager.update();
-                time += GraphicManager.FRAME_TIME;
+
+                if(!playerManager.isGamePaused() || gameOver) {
+                    graphicManager.hidePause();
+                    update();
+                    graphicManager.update();
+                    time += GraphicManager.FRAME_TIME;
+                }
+                else if(!gameOver){
+                    graphicManager.showPause();
+                }
             }
         };
         timer.start();
@@ -237,7 +244,7 @@ public class GameManager {
             @Override
             public void handle(ActionEvent event) {
                 playerManager.enableMouseControl(true);
-                playerManager.enableKeyboardControl(false);
+                playerManager.enableKeyboardControl(true);
                 graphicManager.remove(veil);
 
             }

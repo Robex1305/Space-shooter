@@ -23,6 +23,11 @@ public class PlayerManager {
     private boolean isMovingDown;
     private boolean isMovingLeft;
     private boolean isMovingRight;
+    private boolean gamePaused;
+
+    public boolean isGamePaused() {
+        return gamePaused;
+    }
 
     private LinkedHashMap<Integer, Weapon> rewardWeapons;
     private int nextScoreRewardStep;
@@ -98,6 +103,9 @@ public class PlayerManager {
                 @Override
                 public void handle(KeyEvent event) {
                     switch (event.getCode()) {
+                        case P:
+                            gamePaused = !gamePaused;
+                            break;
                         case Z:
                             isMovingUp = true;
                             break;
@@ -151,13 +159,9 @@ public class PlayerManager {
         Scene scene = graphicManager.getStage().getScene();
 
         if (enabled) {
-            scene.setOnMouseMoved(event -> {
-                moveToCursor(event);
-            });
+            scene.setOnMouseMoved(this::moveToCursor);
 
-            scene.setOnMouseDragged(event -> {
-                moveToCursor(event);
-            });
+            scene.setOnMouseDragged(this::moveToCursor);
 
             scene.setOnMousePressed(event -> {
                 if (MouseButton.PRIMARY.equals(event.getButton()))
@@ -184,23 +188,27 @@ public class PlayerManager {
     }
 
     public void moveToCursor(MouseEvent mouseEvent) {
-        if (graphicManager.getPane().intersects(mouseEvent.getX(), mouseEvent.getY(), 1, 1))
-            this.player.setPosition(mouseEvent.getX(), mouseEvent.getY());
+        if (!isGamePaused()) {
+            if (graphicManager.getPane().intersects(mouseEvent.getX(), mouseEvent.getY(), 1, 1))
+                this.player.setPosition(mouseEvent.getX(), mouseEvent.getY());
+        }
     }
 
     public void updatePlayerCoefficients() {
-        if (isMovingRight ^ isMovingLeft) {
-            if (isMovingLeft) player.setMovingXcoefficient(-1);
-            if (isMovingRight) player.setMovingXcoefficient(1);
-        } else {
-            player.setMovingXcoefficient(0);
-        }
+        if (!isGamePaused()) {
+            if (isMovingRight ^ isMovingLeft) {
+                if (isMovingLeft) player.setMovingXcoefficient(-1);
+                if (isMovingRight) player.setMovingXcoefficient(1);
+            } else {
+                player.setMovingXcoefficient(0);
+            }
 
-        if (isMovingUp ^ isMovingDown) {
-            if (isMovingUp) player.setMovingYcoefficient(-1);
-            if (isMovingDown) player.setMovingYcoefficient(1);
-        } else {
-            player.setMovingYcoefficient(0);
+            if (isMovingUp ^ isMovingDown) {
+                if (isMovingUp) player.setMovingYcoefficient(-1);
+                if (isMovingDown) player.setMovingYcoefficient(1);
+            } else {
+                player.setMovingYcoefficient(0);
+            }
         }
     }
 

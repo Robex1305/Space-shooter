@@ -38,6 +38,8 @@ public class GraphicManager {
     private Text playerScore;
 
     private Text playerAmmo;
+
+    private Label pauseLabel;
     private ImageView background1;
     private ImageView background2;
 
@@ -95,12 +97,29 @@ public class GraphicManager {
         this.playerScore.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
         this.playerAmmo.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
         this.playerLife.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 20));
+
+        pauseLabel = new Label("PAUSE");
+        pauseLabel.setTextFill(Color.WHITE);
+        pauseLabel.setFont(Font.loadFont(ResourcesManager.getInstance().getFileStream(FilesName.FONT), 50));
+        pauseLabel.setMinWidth(getScreenWidth());
+        pauseLabel.setMaxWidth(getScreenWidth());
+        pauseLabel.setAlignment(Pos.CENTER);
+        pauseLabel.setTranslateY(getScreenHeight() / 2);
+        pauseLabel.setOpacity(0);
+
         add(playerScore);
         add(playerLife);
         add(playerAmmo);
+        add(pauseLabel);
         add(ammoIcon);
     }
 
+    public void showPause(){
+        pauseLabel.setOpacity(1);
+    }
+    public void hidePause(){
+        pauseLabel.setOpacity(0);
+    }
     public void setPlayer(Character player) {
         this.player = player;
         add(player);
