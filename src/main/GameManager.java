@@ -57,17 +57,17 @@ public class GameManager {
                     graphicManager.update();
                     time += GraphicManager.FRAME_TIME;
                 }
-                else if(!gameOver){
+                else {
                     graphicManager.showPause();
                 }
             }
         };
-        timer.start();
-        time = 0.0;
-        gameOver = false;
         graphicManager = new GraphicManager(stage);
         playerManager = new PlayerManager(graphicManager);
         npcManager = new NpcManager(graphicManager, playerManager.getPlayer());
+        time = 0.0;
+        gameOver = false;
+        timer.start();
     }
 
     public void update() {

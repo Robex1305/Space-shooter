@@ -77,8 +77,8 @@ public class PlayerManager {
 
     public void addPlayerScore(Integer scoreToAdd) {
         this.setPlayerScore(playerScore + scoreToAdd);
-        graphicManager.updatePlayerScore(getPlayerScore() + "/" + getNextScoreRewardStep());
         checkForUpgrades();
+        graphicManager.updatePlayerScore(getPlayerScore() + "/" + getNextScoreRewardStep());
     }
 
     public void checkForUpgrades() {
