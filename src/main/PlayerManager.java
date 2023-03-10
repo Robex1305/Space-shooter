@@ -104,6 +104,7 @@ public class PlayerManager {
                 public void handle(KeyEvent event) {
                     switch (event.getCode()) {
                         case P:
+                        case ESCAPE:
                             gamePaused = !gamePaused;
                             break;
                         case Z:
@@ -168,6 +169,8 @@ public class PlayerManager {
                     this.player.setIsShooting(true);
                 if (MouseButton.SECONDARY.equals(event.getButton()))
                     this.player.setIsShootingSecondary(true);
+                if(!graphicManager.getStage().isFocused()){
+                }
             });
 
             scene.setOnMouseReleased(event -> {
@@ -188,10 +191,14 @@ public class PlayerManager {
     }
 
     public void moveToCursor(MouseEvent mouseEvent) {
-        if (!isGamePaused()) {
-            if (graphicManager.getPane().intersects(mouseEvent.getX(), mouseEvent.getY(), 1, 1))
-                this.player.setPosition(mouseEvent.getX(), mouseEvent.getY());
+        if (isGamePaused()) {
+            return;
         }
+
+        if(0 <= mouseEvent.getX() && mouseEvent.getX() + player.getWidth() <= graphicManager.getPane().getWidth())
+            this.player.setX(mouseEvent.getX());
+        if(0 <= mouseEvent.getY() && mouseEvent.getY() + player.getHeight() <= graphicManager.getPane().getHeight())
+            this.player.setY(mouseEvent.getY());
     }
 
     public void updatePlayerCoefficients() {

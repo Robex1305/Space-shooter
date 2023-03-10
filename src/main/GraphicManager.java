@@ -26,36 +26,41 @@ import java.util.stream.Collectors;
 public class GraphicManager {
     private ResourcesManager resourcesManager;
 
-    private Stage stage;
-    private Pane pane;
+    private final Stage stage;
+    private final Pane pane;
 
-    private List<Node> toAdd;
-    private List<Node> toRemove;
+    private final List<Node> toAdd;
+    private final List<Node> toRemove;
 
-    private List<Sprite> sprites;
+    private final List<Sprite> sprites;
 
-    private Text playerLife;
-    private Text playerScore;
+    private final Text playerLife;
+    private final Text playerScore;
 
-    private Text playerAmmo;
+    private final Text playerAmmo;
 
-    private Label pauseLabel;
-    private ImageView background1;
-    private ImageView background2;
+    private final Label pauseLabel;
+    private final ImageView background1;
+    private final ImageView background2;
 
     private Character player;
-
+    public static final double SIXTEEN_BY_NINE = (16.0/9.0);
+    public double globalScale = 0;
     final public static double FRAME_TIME = 0.0167;
 
     public GraphicManager(Stage stage) {
         toAdd = new ArrayList<>();
         toRemove = new ArrayList<>();
         sprites = new ArrayList<>();
+        //Initial setup: 1280x720. Keep 16:9 and adjust sprites scales based on this resolution
 
         this.stage = stage;
-        this.stage.setWidth(1280);
-        this.stage.setHeight(720);
-
+        //GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        //int width = gd.getDisplayMode().getWidth();
+        double width = 1280;
+        this.stage.setWidth(width);
+        this.stage.setHeight(width/SIXTEEN_BY_NINE);
+        globalScale = width/1280.0;
         this.resourcesManager = ResourcesManager.getInstance();
 
         pane = new Pane();
@@ -114,6 +119,10 @@ public class GraphicManager {
         add(ammoIcon);
     }
 
+    public double getGlobalScale(){
+        return globalScale;
+    }
+
     public void showPause(){
         pauseLabel.setOpacity(1);
     }
@@ -167,7 +176,11 @@ public class GraphicManager {
             if (node instanceof Sprite) {
                 Sprite sprite = (Sprite) node;
                 toAdd.add(sprite);
+                sprite.setScaleX(getGlobalScale());
+                sprite.setScaleY(getGlobalScale());
                 if (sprite.getSkin() != null) {
+                    sprite.getSkin().setScaleX(getGlobalScale());
+                    sprite.getSkin().setScaleY(getGlobalScale());
                     toAdd.add(sprite.getSkin());
                 }
             } else {
@@ -220,7 +233,7 @@ public class GraphicManager {
                 //Adds to the screen all sprites created by the character. Calling "getSpritesToAdd" return the list but wipes it right after.
                 sprite.getSpritesToAdd().forEach(this::add);
                 sprite.getSpritesToAdd().clear();
-                if (sprite.isToDelete() || isCompletelyOffscreen(sprite)) {
+                if (sprite.isToDelete() || (isCompletelyOffscreen(sprite) && !SpriteType.PLAYER.equals(sprite.getSpriteType()))) {
                     remove(sprite);
                     remove(sprite.getSkin());;
                 }
@@ -246,7 +259,6 @@ public class GraphicManager {
 
         toRemove.clear();
         toAdd.clear();
-        sprites = pane.getChildren().stream().filter(n -> n instanceof Sprite).map(n -> (Sprite) n).collect(Collectors.toList());
     }
 
     public void explodeAt(Sprite sprite) {

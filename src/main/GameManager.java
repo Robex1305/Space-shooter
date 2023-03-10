@@ -187,14 +187,10 @@ public class GameManager {
     public void dropAmmo(Character c) {
         Point p = new Point();
         p.setLocation(c.getX(), c.getY() + c.getHeight() / 2);
-        Item item = new Item(c.getPosition(), 0.2, 1, SpriteType.PLAYER_ROCKET_AMMO, new SpriteModificator() {
-            @Override
-            public void applyEffect(Sprite sprite) {
-                System.out.println("APPLIED EFFECT");
-                if(sprite.getSpriteType().equals(SpriteType.PLAYER)) {
-                    ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
-                    ((Character)sprite).getSecondaryWeapon().setAmmo(((Character)sprite).getSecondaryWeapon().getAmmo() + 1);
-                }
+        Item item = new Item(c.getPosition(), 0.2, 1, SpriteType.PLAYER_ROCKET_AMMO, sprite -> {
+            if(sprite.getSpriteType().equals(SpriteType.PLAYER)) {
+                ResourcesManager.getInstance().playSound(FilesName.HEAL, 100);
+                ((Character)sprite).getSecondaryWeapon().setAmmo(((Character)sprite).getSecondaryWeapon().getAmmo() + 1);
             }
         });
         graphicManager.add(item);

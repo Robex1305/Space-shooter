@@ -84,31 +84,6 @@ public class Sprite extends Rectangle {
         return isToDelete || !isAlive();
     }
 
-    public void move() {
-        setX(getX() + movingXcoefficient * speed);
-        setY(getY() + movingYcoefficient * speed);
-        updateImagePosition();
-        if (this.rotationSpeed != 0) {
-            this.getSkin().setRotate(this.skin.getRotate() + this.rotationSpeed);
-        }
-    }
-
-    public void applyRotation(double delta) {
-        this.rotationSpeed = delta;
-    }
-
-    public void setPosition(double x, double y) {
-        Point p = new Point();
-        p.setLocation(x, y);
-        this.setPosition(p);
-    }
-
-    public void setPosition(Point position) {
-        this.setPositionX(position.getX());
-        this.setPositionY(position.getY());
-    }
-
-
     public void setSpeed(double speed) {
         this.speed = speed;
     }
@@ -138,6 +113,30 @@ public class Sprite extends Rectangle {
     public void adjustImageSize(double ratioX, double ratioY) {
         this.getSkin().setScaleX(ratioX);
         this.getSkin().setScaleY(ratioY);
+    }
+
+    public void move() {
+        setX(getX() + movingXcoefficient * speed);
+        setY(getY() + movingYcoefficient * speed);
+        updateImagePosition();
+        if (this.rotationSpeed != 0) {
+            this.getSkin().setRotate(this.skin.getRotate() + this.rotationSpeed);
+        }
+    }
+
+    public void applyRotation(double delta) {
+        this.rotationSpeed = delta;
+    }
+
+    public void setPosition(double x, double y) {
+        Point p = new Point();
+        p.setLocation(x, y);
+        this.setPosition(p);
+    }
+
+    public void setPosition(Point position) {
+        this.setPositionX(position.getX());
+        this.setPositionY(position.getY());
     }
 
     public void loadSkin() {

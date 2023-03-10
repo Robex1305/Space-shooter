@@ -21,7 +21,7 @@ public class NpcManager {
         if (level > Enemy.MAX_LEVEL) {
             level = Enemy.MAX_LEVEL;
         }
-        //TODO: Use factory to handle unsupported cases like level not supported
+
         Enemy enemy = new Enemy(level);
         enemy.setLife((int) (enemy.getLife().doubleValue() * (1 + GameManager.globalMultiplier/5)));
         enemy.setTarget(currentPlayer);
